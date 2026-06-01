@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 Quiz Master - Panel de Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #0a0a23;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .bg-particles {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(120, 0, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 200, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 80%, rgba(255, 0, 128, 0.1) 0%, transparent 50%);
+      z-index: 0;
+    }
+    .container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+    /* ── Lobby ── */
+    #lobby { text-align: center; padding-top: 30px; }
+    .logo { font-size: 3.5rem; font-weight: 900; margin-bottom: 5px; background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { font-size: 1.1rem; color: #a0a0cc; margin-bottom: 30px; }
+    .qr-section { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 30px; display: inline-block; margin-bottom: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    .qr-section img { width: 250px; height: 250px; border-radius: 12px; background: #fff; padding: 10px; }
+    .join-url { font-size: 1.3rem; color: #667eea; margin-top: 15px; font-weight: 700; letter-spacing: 1px; }
+    .join-label { font-size: 0.9rem; color: #888; margin-top: 5px; }
+    .player-counter {
+      font-size: 5rem; font-weight: 900;
+      background: linear-gradient(135deg, #00f5a0, #00d9f5);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin: 20px 0 5px;
+    }
+    .player-counter-label { font-size: 1rem; color: #a0a0cc; margin-bottom: 20px; }
+    .players-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 15px auto; max-width: 800px; }
+    .player-chip {
+      background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
+      padding: 8px 18px; border-radius: 25px; font-size: 0.9rem; font-weight: 600;
+      border: 1px solid rgba(102,126,234,0.4);
+      animation: popIn 0.3s ease;
+    }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .btn {
+      display: inline-block; padding: 16px 50px; border: none; border-radius: 50px;
+      font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 700;
+      cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 2px;
+    }
+    .btn-start {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff; box-shadow: 0 8px 30px rgba(102,126,234,0.4);
+    }
+    .btn-start:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(102,126,234,0.6); }
+    .btn-start:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-next { background: linear-gradient(135deg, #00f5a0, #00d9f5); color: #0a0a23; }
+    .btn-next:hover { transform: translateY(-3px); }
+    .btn-reset { background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: #fff; font-size: 0.9rem; padding: 12px 30px; }
+
+    /* ── Question (Host view) ── */
+    #question-screen { display: none; text-align: center; padding-top: 20px; }
+    .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .question-num { font-size: 1rem; color: #a0a0cc; }
+    .category-badge { background: rgba(102,126,234,0.3); padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: #667eea; }
+    .timer-ring {
+      width: 120px; height: 120px; margin: 10px auto 20px;
+      position: relative; display: flex; align-items: center; justify-content: center;
+    }
+    .timer-ring svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+    .timer-ring circle { fill: none; stroke-width: 6; }
+    .timer-ring .bg { stroke: rgba(255,255,255,0.1); }
+    .timer-ring .fg { stroke: #00f5a0; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+    .timer-ring .fg.warning { stroke: #f7b731; }
+    .timer-ring .fg.danger { stroke: #ff6b6b; }
+    .timer-text { font-size: 2.5rem; font-weight: 900; z-index: 1; }
+    .question-text {
+      font-size: 1.8rem; font-weight: 700; margin-bottom: 30px; line-height: 1.4;
+      padding: 25px; background: rgba(255,255,255,0.05); border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 900px; margin: 0 auto 25px; }
+    .option-card {
+      padding: 22px 20px; border-radius: 14px; font-size: 1.15rem; font-weight: 600;
+      display: flex; align-items: center; gap: 15px; min-height: 75px;
+    }
+    .option-card .shape {
+      width: 36px; height: 36px; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; font-size: 1.3rem;
+    }
+    .opt-0 { background: #e21b3c; }
+    .opt-1 { background: #1368ce; }
+    .opt-2 { background: #d89e00; }
+    .opt-3 { background: #26890c; }
+    .answer-counter {
+      background: rgba(255,255,255,0.08); padding: 15px 30px; border-radius: 14px;
+      display: inline-block; font-size: 1.1rem; margin-top: 10px;
+    }
+    .answer-counter span { font-weight: 900; font-size: 1.8rem; color: #00f5a0; }
+
+    /* ── Results ── */
+    #results-screen { display: none; text-align: center; padding-top: 30px; }
+    .results-title { font-size: 2rem; font-weight: 900; margin-bottom: 20px; }
+    .correct-answer-box {
+      background: linear-gradient(135deg, rgba(0,245,160,0.2), rgba(0,217,245,0.2));
+      border: 2px solid #00f5a0; border-radius: 16px; padding: 20px 30px;
+      font-size: 1.3rem; font-weight: 700; margin-bottom: 25px; display: inline-block;
+    }
+    .stats-row { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; flex-wrap: wrap; }
+    .stat-card {
+      background: rgba(255,255,255,0.06); border-radius: 14px; padding: 20px 30px;
+      min-width: 150px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-card .num { font-size: 2.5rem; font-weight: 900; }
+    .stat-card .label { font-size: 0.85rem; color: #a0a0cc; margin-top: 5px; }
+    .stat-correct .num { color: #00f5a0; }
+    .stat-wrong .num { color: #ff6b6b; }
+    .stat-noanswer .num { color: #a0a0cc; }
+    .distribution-bar { display: flex; gap: 12px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+    .dist-item { text-align: center; min-width: 80px; }
+    .dist-bar-wrap { height: 120px; display: flex; align-items: flex-end; justify-content: center; }
+    .dist-bar { width: 50px; border-radius: 8px 8px 0 0; min-height: 5px; transition: height 0.8s ease; }
+    .dist-count { font-size: 1.1rem; font-weight: 700; margin-top: 5px; }
+    .dist-label { font-size: 0.75rem; color: #a0a0cc; }
+    .mini-leaderboard { max-width: 500px; margin: 20px auto; }
+    .mini-leader-row {
+      display: flex; align-items: center; gap: 15px; padding: 12px 20px; margin: 6px 0;
+      background: rgba(255,255,255,0.06); border-radius: 12px;
+    }
+    .mini-leader-row:first-child { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.2)); border: 1px solid rgba(255,215,0,0.3); }
+    .mini-rank { font-size: 1.3rem; font-weight: 900; width: 35px; }
+    .mini-name { flex: 1; font-weight: 600; }
+    .mini-score { font-weight: 700; color: #00f5a0; }
+    .btn-group { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
+
+    /* ── Leaderboard ── */
+    #leaderboard-screen { display: none; text-align: center; padding-top: 30px; }
+    .lb-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 30px; background: linear-gradient(135deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .podium { display: flex; justify-content: center; align-items: flex-end; gap: 15px; margin-bottom: 30px; }
+    .podium-item { text-align: center; animation: slideUp 0.6s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    .podium-avatar {
+      width: 70px; height: 70px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 900;
+      margin: 0 auto 10px; border: 3px solid;
+    }
+    .podium-1 .podium-avatar { background: rgba(255,215,0,0.2); border-color: #ffd700; color: #ffd700; }
+    .podium-2 .podium-avatar { background: rgba(192,192,192,0.2); border-color: #c0c0c0; color: #c0c0c0; }
+    .podium-3 .podium-avatar { background: rgba(205,127,50,0.2); border-color: #cd7f32; color: #cd7f32; }
+    .podium-bar { border-radius: 10px 10px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; }
+    .podium-1 .podium-bar { background: linear-gradient(to top, rgba(255,215,0,0.3), rgba(255,215,0,0.1)); height: 160px; width: 120px; }
+    .podium-2 .podium-bar { background: linear-gradient(to top, rgba(192,192,192,0.3), rgba(192,192,192,0.1)); height: 120px; width: 110px; }
+    .podium-3 .podium-bar { background: linear-gradient(to top, rgba(205,127,50,0.3), rgba(205,127,50,0.1)); height: 90px; width: 110px; }
+    .podium-name { font-weight: 700; font-size: 1rem; margin-top: 5px; }
+    .podium-score { font-size: 0.85rem; color: #a0a0cc; }
+    .full-ranking { max-width: 600px; margin: 0 auto; }
+    .rank-row {
+      display: flex; align-items: center; gap: 15px; padding: 14px 20px;
+      margin: 5px 0; background: rgba(255,255,255,0.05); border-radius: 12px;
+      transition: transform 0.2s;
+    }
+    .rank-row:hover { transform: translateX(5px); }
+    .rank-pos { font-size: 1.2rem; font-weight: 900; width: 40px; color: #667eea; }
+    .rank-name { flex: 1; font-weight: 600; }
+    .rank-score { font-weight: 700; color: #00f5a0; }
+    .rank-streak { font-size: 0.8rem; color: #f7b731; }
+
+    /* ── Final ── */
+    #final-screen { display: none; text-align: center; padding-top: 30px; }
+    .final-title { font-size: 3rem; font-weight: 900; margin-bottom: 10px; }
+    .winner-showcase {
+      background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.15));
+      border: 2px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 30px;
+      margin: 25px auto; max-width: 400px;
+    }
+    .winner-crown { font-size: 4rem; margin-bottom: 10px; }
+    .winner-name { font-size: 2rem; font-weight: 900; color: #ffd700; }
+    .winner-score { font-size: 1.1rem; color: #a0a0cc; margin-top: 5px; }
+    .final-stats { max-width: 700px; margin: 25px auto; }
+    .final-stat-row {
+      display: flex; align-items: center; gap: 15px; padding: 12px 20px;
+      background: rgba(255,255,255,0.05); border-radius: 12px; margin: 6px 0;
+    }
+    .final-pos { font-weight: 900; width: 35px; font-size: 1.1rem; }
+    .final-name { flex: 1; font-weight: 600; text-align: left; }
+    .final-score { font-weight: 700; color: #00f5a0; min-width: 70px; }
+    .final-accuracy { font-size: 0.85rem; color: #a0a0cc; min-width: 60px; }
+    .final-bar { flex: 1; max-width: 200px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .final-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 768px) {
+      .logo { font-size: 2.2rem; }
+      .question-text { font-size: 1.3rem; padding: 18px; }
+      .options-grid { grid-template-columns: 1fr; }
+      .podium { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-particles"></div>
+  <div class="container">
+
+    <!-- LOBBY -->
+    <div id="lobby">
+      <div class="logo">QUIZ MASTER</div>
+      <div class="subtitle">Seguridad Informática & Herramientas GNU/Linux</div>
+      <div class="qr-section">
+        <p style="margin-bottom:12px; font-weight:600; color:#a0a0cc;">Escanea para unirte</p>
+        <img id="qr-img" src="" alt="QR Code">
+        <div class="join-url" id="join-url">Cargando...</div>
+        <div class="join-label">o ingresa esta URL en tu navegador</div>
+      </div>
+      <div class="player-counter" id="player-count">0</div>
+      <div class="player-counter-label">jugadores conectados</div>
+      <div class="players-list" id="players-list"></div>
+      <div style="margin-top:25px;">
+        <button class="btn btn-start" id="btn-start" disabled onclick="startGame()">Iniciar Juego</button>
+      </div>
+      <p id="questions-info" style="margin-top:15px; color:#667eea; font-size:0.9rem;"></p>
+    </div>
+
+    <!-- QUESTION -->
+    <div id="question-screen">
+      <div class="question-header">
+        <span class="question-num" id="q-num">Pregunta 1 / 30</span>
+        <span class="category-badge" id="q-category">Virus</span>
+      </div>
+      <div class="timer-ring" id="timer-ring">
+        <svg width="120" height="120">
+          <circle class="bg" cx="60" cy="60" r="54"></circle>
+          <circle class="fg" id="timer-circle" cx="60" cy="60" r="54"></circle>
+        </svg>
+        <span class="timer-text" id="timer-text">20</span>
+      </div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options-grid" id="q-options"></div>
+      <div class="answer-counter">
+        <span id="answer-count">0</span> / <span id="answer-total">0</span> respuestas
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results-screen">
+      <div class="results-title">Resultados</div>
+      <div class="correct-answer-box" id="correct-answer-box"></div>
+      <div class="stats-row" id="stats-row"></div>
+      <div class="distribution-bar" id="distribution-bar"></div>
+      <div style="margin:20px 0; font-weight:700; color:#a0a0cc;">Top 5</div>
+      <div class="mini-leaderboard" id="mini-leaderboard"></div>
+      <div class="btn-group">
+        <button class="btn btn-next" onclick="showLeaderboard()">Ver Ranking</button>
+        <button class="btn btn-next" id="btn-next-q" onclick="nextQuestion()">Siguiente Pregunta</button>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="leaderboard-screen">
+      <div class="lb-title">RANKING</div>
+      <div class="podium" id="podium"></div>
+      <div class="full-ranking" id="full-ranking"></div>
+      <div class="btn-group" style="margin-top:30px;">
+        <button class="btn btn-next" id="btn-lb-next" onclick="nextQuestion()">Siguiente Pregunta</button>
+      </div>
+    </div>
+
+    <!-- FINAL -->
+    <div id="final-screen">
+      <div class="final-title">Juego Terminado</div>
+      <div class="winner-showcase" id="winner-showcase"></div>
+      <div style="margin:20px 0; font-weight:700; font-size:1.2rem;">Ranking Final</div>
+      <div class="final-stats" id="final-stats"></div>
+      <div class="btn-group" style="margin-top:30px;">
+        <button class="btn btn-reset" onclick="resetGame()">Nuevo Juego</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const shapes = ['&#9650;', '&#9670;', '&#9679;', '&#9632;'];
+    const optClasses = ['opt-0','opt-1','opt-2','opt-3'];
+    let timerInterval = null;
+    let currentTime = 0;
+    let totalTime = 0;
+    let totalQuestions = 30;
+    let currentQuestionIndex = 0;
+
+    // Load QR
+    fetch('/qr').then(r => r.json()).then(data => {
+      document.getElementById('qr-img').src = data.qr;
+      document.getElementById('join-url').textContent = data.url;
+    });
+    fetch('/api/questions-count').then(r => r.json()).then(data => {
+      totalQuestions = data.count;
+      document.getElementById('questions-info').textContent = `${data.count} preguntas cargadas`;
+    });
+
+    socket.on('player-count', count => {
+      document.getElementById('player-count').textContent = count;
+      document.getElementById('btn-start').disabled = count === 0;
+    });
+
+    socket.on('player-joined', data => {
+      const list = document.getElementById('players-list');
+      const chip = document.createElement('div');
+      chip.className = 'player-chip';
+      chip.textContent = data.nickname;
+      chip.id = 'chip-' + data.nickname;
+      list.appendChild(chip);
+    });
+
+    socket.on('player-left', data => {
+      const chip = document.getElementById('chip-' + data.nickname);
+      if (chip) chip.remove();
+    });
+
+    socket.on('question', data => {
+      currentQuestionIndex = data.index;
+      showScreen('question-screen');
+      document.getElementById('q-num').textContent = `Pregunta ${data.index + 1} / ${data.total}`;
+      document.getElementById('q-category').textContent = data.category;
+      document.getElementById('q-text').textContent = data.question;
+
+      const grid = document.getElementById('q-options');
+      grid.innerHTML = '';
+      data.options.forEach((opt, i) => {
+        const card = document.createElement('div');
+        card.className = `option-card ${optClasses[i]}`;
+        card.innerHTML = `<span class="shape">${shapes[i]}</span><span>${opt}</span>`;
+        grid.appendChild(card);
+      });
+
+      document.getElementById('answer-count').textContent = '0';
+      document.getElementById('answer-total').textContent = Object.keys(socket).length || '?';
+
+      startTimer(data.time);
+    });
+
+    socket.on('answer-count', data => {
+      document.getElementById('answer-count').textContent = data.answered;
+      document.getElementById('answer-total').textContent = data.total;
+    });
+
+    socket.on('question-results', data => {
+      showScreen('results-screen');
+      clearInterval(timerInterval);
+
+      document.getElementById('correct-answer-box').innerHTML = `✅ ${data.correctText}`;
+
+      const statsRow = document.getElementById('stats-row');
+      const noAnswer = data.totalPlayers - data.answeredCount;
+      statsRow.innerHTML = `
+        <div class="stat-card stat-correct"><div class="num">${data.correctCount}</div><div class="label">Correctas</div></div>
+        <div class="stat-card stat-wrong"><div class="num">${data.answeredCount - data.correctCount}</div><div class="label">Incorrectas</div></div>
+        <div class="stat-card stat-noanswer"><div class="num">${noAnswer}</div><div class="label">Sin respuesta</div></div>
+      `;
+
+      const distBar = document.getElementById('distribution-bar');
+      const maxDist = Math.max(...data.distribution, 1);
+      const colors = ['#e21b3c','#1368ce','#d89e00','#26890c'];
+      distBar.innerHTML = data.distribution.map((count, i) => `
+        <div class="dist-item">
+          <div class="dist-bar-wrap">
+            <div class="dist-bar" style="background:${colors[i]};height:${(count/maxDist)*100}px;${i === data.correctAnswer ? 'box-shadow:0 0 15px rgba(0,245,160,0.5);border:2px solid #00f5a0;' : ''}"></div>
+          </div>
+          <div class="dist-count">${count}</div>
+          <div class="dist-label">${shapes[i]}</div>
+        </div>
+      `).join('');
+
+      const mlb = document.getElementById('mini-leaderboard');
+      mlb.innerHTML = data.leaderboard.map((p, i) => `
+        <div class="mini-leader-row">
+          <span class="mini-rank">${i+1}</span>
+          <span class="mini-name">${p.nickname}</span>
+          <span class="mini-score">${p.score.toLocaleString()} pts</span>
+        </div>
+      `).join('');
+
+      const isLast = currentQuestionIndex >= totalQuestions - 1;
+      document.getElementById('btn-next-q').textContent = isLast ? 'Ver Resultados Finales' : 'Siguiente Pregunta';
+    });
+
+    socket.on('leaderboard', data => {
+      showScreen('leaderboard-screen');
+      const lb = data.leaderboard;
+
+      const podium = document.getElementById('podium');
+      const positions = [1, 0, 2]; // 2nd, 1st, 3rd
+      podium.innerHTML = positions.map(pos => {
+        if (!lb[pos]) return '';
+        const p = lb[pos];
+        const classes = ['podium-1','podium-2','podium-3'];
+        const medals = ['🥇','🥈','🥉'];
+        return `
+          <div class="podium-item ${classes[pos]}" style="animation-delay:${pos*0.2}s">
+            <div class="podium-avatar">${p.nickname.charAt(0).toUpperCase()}</div>
+            <div class="podium-name">${p.nickname}</div>
+            <div class="podium-score">${p.score.toLocaleString()} pts</div>
+            <div class="podium-bar"><span style="font-size:1.5rem">${medals[pos]}</span></div>
+          </div>`;
+      }).join('');
+
+      const ranking = document.getElementById('full-ranking');
+      ranking.innerHTML = lb.slice(3).map((p, i) => `
+        <div class="rank-row">
+          <span class="rank-pos">${i+4}</span>
+          <span class="rank-name">${p.nickname}</span>
+          ${p.streak > 1 ? `<span class="rank-streak">🔥${p.streak}</span>` : ''}
+          <span class="rank-score">${p.score.toLocaleString()} pts</span>
+        </div>
+      `).join('');
+
+      const isLast = currentQuestionIndex >= totalQuestions - 1;
+      document.getElementById('btn-lb-next').textContent = isLast ? 'Ver Resultados Finales' : 'Siguiente Pregunta';
+    });
+
+    socket.on('game-finished', data => {
+      showScreen('final-screen');
+      clearInterval(timerInterval);
+
+      const winner = data.leaderboard[0];
+      document.getElementById('winner-showcase').innerHTML = `
+        <div class="winner-crown">👑</div>
+        <div class="winner-name">${winner ? winner.nickname : '-'}</div>
+        <div class="winner-score">${winner ? winner.score.toLocaleString() + ' puntos' : ''}</div>
+      `;
+
+      const stats = document.getElementById('final-stats');
+      const maxScore = Math.max(...data.playerStats.map(p => p.score), 1);
+      stats.innerHTML = data.playerStats
+        .sort((a, b) => b.score - a.score)
+        .map((p, i) => {
+          const barColor = p.accuracy >= 70 ? '#00f5a0' : p.accuracy >= 40 ? '#f7b731' : '#ff6b6b';
+          return `
+            <div class="final-stat-row">
+              <span class="final-pos">${i+1}</span>
+              <span class="final-name">${p.nickname}</span>
+              <span class="final-accuracy">${p.accuracy}%</span>
+              <div class="final-bar"><div class="final-bar-fill" style="width:${(p.score/maxScore)*100}%;background:${barColor}"></div></div>
+              <span class="final-score">${p.score.toLocaleString()}</span>
+            </div>`;
+        }).join('');
+    });
+
+    socket.on('game-reset', () => {
+      document.getElementById('players-list').innerHTML = '';
+      document.getElementById('player-count').textContent = '0';
+      showScreen('lobby');
+    });
+
+    function showScreen(id) {
+      ['lobby','question-screen','results-screen','leaderboard-screen','final-screen'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? 'block' : 'none';
+      });
+    }
+
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      totalTime = seconds;
+      currentTime = seconds;
+      const circle = document.getElementById('timer-circle');
+      const circumference = 2 * Math.PI * 54;
+      circle.style.strokeDasharray = circumference;
+      circle.style.strokeDashoffset = 0;
+      circle.classList.remove('warning','danger');
+      document.getElementById('timer-text').textContent = seconds;
+
+      timerInterval = setInterval(() => {
+        currentTime -= 1;
+        if (currentTime < 0) { clearInterval(timerInterval); return; }
+        document.getElementById('timer-text').textContent = currentTime;
+        const progress = 1 - (currentTime / totalTime);
+        circle.style.strokeDashoffset = circumference * progress;
+        circle.classList.remove('warning','danger');
+        if (currentTime <= 5) circle.classList.add('danger');
+        else if (currentTime <= 10) circle.classList.add('warning');
+      }, 1000);
+    }
+
+    function startGame() { socket.emit('start-game'); }
+    function nextQuestion() { socket.emit('next-question'); }
+    function showLeaderboard() { socket.emit('show-leaderboard'); }
+    function resetGame() { socket.emit('reset-game'); }
+  </script>
+</body>
+</html>
