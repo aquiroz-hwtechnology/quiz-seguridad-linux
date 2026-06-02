@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Master - Panel de Control</title>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a23;color:#fff;min-height:100vh;overflow-x:hidden}
+    .bg{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 50%,rgba(120,0,255,.15) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(0,200,255,.1) 0%,transparent 50%),radial-gradient(circle at 50% 80%,rgba(255,0,128,.1) 0%,transparent 50%);z-index:0}
+    .container{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:20px;text-align:center}
+    .logo{font-size:3.2rem;font-weight:900;margin-bottom:4px;background:linear-gradient(135deg,#667eea,#764ba2,#f093fb);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{font-size:1rem;color:#a0a0cc;margin-bottom:25px}
+    .qr-box{background:rgba(255,255,255,.05);border-radius:18px;padding:25px;display:inline-block;margin-bottom:20px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1)}
+    .qr-box canvas{border-radius:10px;background:#fff;padding:8px}
+    .join-url{font-size:1.1rem;color:#667eea;margin-top:12px;font-weight:700;word-break:break-all}
+    .join-label{font-size:.8rem;color:#888;margin-top:4px}
+    .room-code{font-size:2rem;font-weight:900;color:#00f5a0;letter-spacing:6px;margin:8px 0}
+    .counter{font-size:4.5rem;font-weight:900;background:linear-gradient(135deg,#00f5a0,#00d9f5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:15px 0 2px}
+    .counter-label{font-size:.9rem;color:#a0a0cc;margin-bottom:15px}
+    .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:10px auto;max-width:700px}
+    .chip{background:linear-gradient(135deg,rgba(102,126,234,.3),rgba(118,75,162,.3));padding:6px 16px;border-radius:20px;font-size:.85rem;font-weight:600;border:1px solid rgba(102,126,234,.4);animation:pop .3s ease}
+    @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+    .btn{display:inline-block;padding:15px 45px;border:none;border-radius:50px;font-family:inherit;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:2px}
+    .btn-start{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 8px 30px rgba(102,126,234,.4)}
+    .btn-start:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(102,126,234,.6)}
+    .btn-start:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .btn-next{background:linear-gradient(135deg,#00f5a0,#00d9f5);color:#0a0a23}
+    .btn-reset{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;font-size:.85rem;padding:10px 25px}
+    .btn-group{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+    .screen{display:none}
+    .screen.active{display:block}
+    /* Question */
+    .q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .q-num{font-size:.9rem;color:#a0a0cc}
+    .cat-badge{background:rgba(102,126,234,.3);padding:5px 15px;border-radius:18px;font-size:.8rem;font-weight:600;color:#667eea}
+    .timer-ring{width:110px;height:110px;margin:8px auto 15px;position:relative;display:flex;align-items:center;justify-content:center}
+    .timer-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
+    .timer-ring circle{fill:none;stroke-width:6}
+    .timer-ring .bg-c{stroke:rgba(255,255,255,.1)}
+    .timer-ring .fg-c{stroke:#00f5a0;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .3s}
+    .timer-ring .fg-c.warn{stroke:#f7b731}
+    .timer-ring .fg-c.danger{stroke:#ff6b6b}
+    .timer-text{font-size:2.2rem;font-weight:900;z-index:1}
+    .q-text{font-size:1.6rem;font-weight:700;margin-bottom:25px;line-height:1.4;padding:20px;background:rgba(255,255,255,.05);border-radius:14px;border:1px solid rgba(255,255,255,.1)}
+    .opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:850px;margin:0 auto 20px}
+    .opt-card{padding:18px 16px;border-radius:12px;font-size:1.05rem;font-weight:600;display:flex;align-items:center;gap:12px;min-height:65px}
+    .opt-card .sh{width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+    .o0{background:#e21b3c}.o1{background:#1368ce}.o2{background:#d89e00}.o3{background:#26890c}
+    .ans-counter{background:rgba(255,255,255,.08);padding:12px 25px;border-radius:12px;display:inline-block;font-size:1rem;margin-top:8px}
+    .ans-counter span{font-weight:900;font-size:1.6rem;color:#00f5a0}
+    /* Results */
+    .res-title{font-size:1.8rem;font-weight:900;margin-bottom:15px}
+    .correct-box{background:linear-gradient(135deg,rgba(0,245,160,.2),rgba(0,217,245,.2));border:2px solid #00f5a0;border-radius:14px;padding:16px 25px;font-size:1.2rem;font-weight:700;margin-bottom:20px;display:inline-block}
+    .stats-row{display:flex;justify-content:center;gap:25px;margin-bottom:20px;flex-wrap:wrap}
+    .stat-card{background:rgba(255,255,255,.06);border-radius:12px;padding:16px 25px;min-width:120px;border:1px solid rgba(255,255,255,.1)}
+    .stat-card .n{font-size:2.2rem;font-weight:900}
+    .stat-card .l{font-size:.8rem;color:#a0a0cc;margin-top:3px}
+    .sc .n{color:#00f5a0}.sw .n{color:#ff6b6b}.sn .n{color:#a0a0cc}
+    .dist{display:flex;gap:10px;justify-content:center;margin:15px 0;flex-wrap:wrap}
+    .dist-item{text-align:center;min-width:70px}
+    .dist-bw{height:100px;display:flex;align-items:flex-end;justify-content:center}
+    .dist-b{width:45px;border-radius:7px 7px 0 0;min-height:4px;transition:height .8s ease}
+    .dist-cnt{font-size:1rem;font-weight:700;margin-top:4px}
+    .mini-lb{max-width:450px;margin:15px auto}
+    .mini-row{display:flex;align-items:center;gap:12px;padding:10px 16px;margin:5px 0;background:rgba(255,255,255,.06);border-radius:10px}
+    .mini-row:first-child{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,165,0,.2));border:1px solid rgba(255,215,0,.3)}
+    .mini-rk{font-size:1.2rem;font-weight:900;width:30px}
+    .mini-nm{flex:1;font-weight:600}
+    .mini-sc{font-weight:700;color:#00f5a0}
+    /* Podium */
+    .lb-title{font-size:2.2rem;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .podium{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin-bottom:25px}
+    .pod-item{text-align:center;animation:slideUp .6s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    .pod-av{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:900;margin:0 auto 8px;border:3px solid}
+    .p1 .pod-av{background:rgba(255,215,0,.2);border-color:#ffd700;color:#ffd700}
+    .p2 .pod-av{background:rgba(192,192,192,.2);border-color:#c0c0c0;color:#c0c0c0}
+    .p3 .pod-av{background:rgba(205,127,50,.2);border-color:#cd7f32;color:#cd7f32}
+    .pod-bar{border-radius:8px 8px 0 0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px}
+    .p1 .pod-bar{background:linear-gradient(to top,rgba(255,215,0,.3),rgba(255,215,0,.1));height:140px;width:110px}
+    .p2 .pod-bar{background:linear-gradient(to top,rgba(192,192,192,.3),rgba(192,192,192,.1));height:105px;width:100px}
+    .p3 .pod-bar{background:linear-gradient(to top,rgba(205,127,50,.3),rgba(205,127,50,.1));height:80px;width:100px}
+    .pod-nm{font-weight:700;font-size:.9rem;margin-top:4px}
+    .pod-sc{font-size:.8rem;color:#a0a0cc}
+    .full-rk{max-width:550px;margin:0 auto}
+    .rk-row{display:flex;align-items:center;gap:12px;padding:12px 18px;margin:4px 0;background:rgba(255,255,255,.05);border-radius:10px}
+    .rk-pos{font-size:1.1rem;font-weight:900;width:35px;color:#667eea}
+    .rk-nm{flex:1;font-weight:600}
+    .rk-sc{font-weight:700;color:#00f5a0}
+    /* Final */
+    .final-title{font-size:2.5rem;font-weight:900;margin-bottom:10px}
+    .winner-box{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,165,0,.15));border:2px solid rgba(255,215,0,.3);border-radius:18px;padding:25px;margin:20px auto;max-width:380px}
+    .winner-crown{font-size:3.5rem;margin-bottom:8px}
+    .winner-name{font-size:1.8rem;font-weight:900;color:#ffd700}
+    .winner-score{font-size:1rem;color:#a0a0cc;margin-top:4px}
+    .final-rows{max-width:650px;margin:20px auto}
+    .final-row{display:flex;align-items:center;gap:12px;padding:10px 18px;background:rgba(255,255,255,.05);border-radius:10px;margin:5px 0}
+    .f-pos{font-weight:900;width:30px;font-size:1rem}
+    .f-nm{flex:1;font-weight:600;text-align:left}
+    .f-sc{font-weight:700;color:#00f5a0;min-width:60px}
+    .f-acc{font-size:.8rem;color:#a0a0cc;min-width:50px}
+    .f-bar{flex:1;max-width:180px;height:7px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+    .f-bar-fill{height:100%;border-radius:4px;transition:width 1s ease}
+    .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;animation:blink 1.5s infinite}
+    .status-dot.on{background:#00f5a0}
+    .status-dot.off{background:#ff6b6b}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+    .connection-status{font-size:.8rem;color:#a0a0cc;margin-top:10px}
+    @media(max-width:768px){.logo{font-size:2rem}.q-text{font-size:1.2rem;padding:14px}.opts-grid{grid-template-columns:1fr}.podium{flex-wrap:wrap}}
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="container">
+
+  <!-- LOBBY -->
+  <div id="s-lobby" class="screen active">
+    <div class="logo">QUIZ MASTER</div>
+    <div class="subtitle">Seguridad Informatica & Herramientas GNU/Linux</div>
+    <div class="connection-status"><span class="status-dot" id="status-dot"></span><span id="status-text">Conectando...</span></div>
+    <div class="qr-box">
+      <p style="margin-bottom:10px;font-weight:600;color:#a0a0cc">Escanea para unirte</p>
+      <canvas id="qr-canvas"></canvas>
+      <div class="room-code" id="room-code"></div>
+      <div class="join-url" id="join-url"></div>
+      <div class="join-label">o ingresa esta URL en tu navegador</div>
+    </div>
+    <div class="counter" id="player-count">0</div>
+    <div class="counter-label">jugadores conectados</div>
+    <div class="chips" id="chips"></div>
+    <div style="margin-top:20px">
+      <button class="btn btn-start" id="btn-start" disabled onclick="startGame()">Iniciar Juego</button>
+    </div>
+    <p id="q-info" style="margin-top:12px;color:#667eea;font-size:.85rem"></p>
+  </div>
+
+  <!-- QUESTION -->
+  <div id="s-question" class="screen">
+    <div class="q-header"><span class="q-num" id="qn"></span><span class="cat-badge" id="qc"></span></div>
+    <div class="timer-ring"><svg width="110" height="110"><circle class="bg-c" cx="55" cy="55" r="50"></circle><circle class="fg-c" id="tc" cx="55" cy="55" r="50"></circle></svg><span class="timer-text" id="tt">20</span></div>
+    <div class="q-text" id="qt"></div>
+    <div class="opts-grid" id="qo"></div>
+    <div class="ans-counter"><span id="ac">0</span> / <span id="at">0</span> respuestas</div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="s-results" class="screen">
+    <div class="res-title">Resultados</div>
+    <div class="correct-box" id="r-correct"></div>
+    <div class="stats-row" id="r-stats"></div>
+    <div class="dist" id="r-dist"></div>
+    <div style="margin:15px 0;font-weight:700;color:#a0a0cc">Top 5</div>
+    <div class="mini-lb" id="r-lb"></div>
+    <div class="btn-group">
+      <button class="btn btn-next" onclick="showLeaderboard()">Ver Ranking</button>
+      <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Siguiente Pregunta</button>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="s-leaderboard" class="screen">
+    <div class="lb-title">RANKING</div>
+    <div class="podium" id="podium"></div>
+    <div class="full-rk" id="full-rk"></div>
+    <div class="btn-group" style="margin-top:25px">
+      <button class="btn btn-next" id="btn-lb-next" onclick="nextQuestion()">Siguiente Pregunta</button>
+    </div>
+  </div>
+
+  <!-- FINAL -->
+  <div id="s-final" class="screen">
+    <div class="final-title">Juego Terminado</div>
+    <div class="winner-box" id="winner-box"></div>
+    <div style="margin:18px 0;font-weight:700;font-size:1.1rem">Ranking Final</div>
+    <div class="final-rows" id="final-rows"></div>
+    <div class="btn-group" style="margin-top:25px">
+      <button class="btn btn-reset" onclick="resetGame()">Nuevo Juego</button>
+    </div>
+  </div>
+
+</div>
+<script>
+const SHAPES=['&#9650;','&#9670;','&#9679;','&#9632;'];
+const OC=['o0','o1','o2','o3'];
+const COLORS=['#e21b3c','#1368ce','#d89e00','#26890c'];
+const Q=[
+  {q:"Que es un virus informatico?",o:["Un programa que optimiza el sistema","Un programa malicioso que se replica y causa danos","Un tipo de hardware defectuoso","Una actualizacion del sistema operativo"],c:1,t:20,cat:"Virus"},
+  {q:"Cual es una caracteristica fundamental de un virus informatico?",o:["No necesita un archivo huesped","Se ejecuta de forma independiente","Necesita un huesped (archivo o programa) para reproducirse","Solo afecta a hardware"],c:2,t:20,cat:"Virus"},
+  {q:"Que comando se usa en Linux para escanear todo el sistema con ClamAV?",o:["clamscan -r /","clamav --scan-all","sudo scan-virus /","antivirus --check /"],c:0,t:20,cat:"Comandos"},
+  {q:"Que herramienta se especializa en detectar rootkits en Linux?",o:["ClamAV","Wireshark","rkhunter (Rootkit Hunter)","BleachBit"],c:2,t:20,cat:"Herramientas"},
+  {q:"Que es el Spyware?",o:["Software que acelera internet","Software malicioso que recopila datos sin consentimiento","Un tipo de firewall para Linux","Un programa de copias de seguridad"],c:1,t:20,cat:"Spyware"},
+  {q:"Cual de estos es un tipo de spyware?",o:["Firewall","Keylogger","Compilador","Servidor DNS"],c:1,t:15,cat:"Spyware"},
+  {q:"Que es un paquete .deb?",o:["Un archivo de texto plano","El formato estandar de instalacion en Debian/Ubuntu","Un tipo de virus para Linux","Un lenguaje de programacion"],c:1,t:15,cat:"Paquetes .deb"},
+  {q:"Cual es la diferencia principal entre dpkg y apt?",o:["dpkg es mas nuevo que apt","apt no puede instalar paquetes","dpkg NO resuelve dependencias, apt SI las resuelve","No hay diferencia, son iguales"],c:2,t:20,cat:"Paquetes .deb"},
+  {q:"Que comando instala un paquete .deb manualmente?",o:["sudo apt install archivo.deb","sudo dpkg -i archivo.deb","sudo rpm -i archivo.deb","sudo install archivo.deb"],c:1,t:15,cat:"Comandos"},
+  {q:"Que significa Malware?",o:["Software de mantenimiento","Software malicioso (malicious software)","Software de marketing","Hardware defectuoso"],c:1,t:15,cat:"Malware"},
+  {q:"Cual fue el primer programa que se propagaba por red?",o:["Stuxnet","Elk Cloner","Creeper (1971)","ILOVEYOU"],c:2,t:20,cat:"Malware"},
+  {q:"Que tipo de malware cifra archivos y exige pago?",o:["Spyware","Adware","Ransomware","Keylogger"],c:2,t:15,cat:"Malware"},
+  {q:"Que es Wireshark?",o:["Un antivirus para Linux","Software de analisis de paquetes de red libre","Un firewall empresarial","Un gestor de paquetes .deb"],c:1,t:20,cat:"Herramientas"},
+  {q:"Que significa UFW?",o:["Universal File Watcher","Uncomplicated Firewall","Ubuntu Free Wireless","Unix Framework for Web"],c:1,t:15,cat:"Herramientas"},
+  {q:"Que hace el comando 'sudo freshclam'?",o:["Instala ClamAV","Elimina virus del sistema","Actualiza la base de datos de firmas de ClamAV","Desinstala ClamAV"],c:2,t:20,cat:"Comandos"},
+  {q:"Donde se encuentran los logs del sistema en Linux?",o:["/home/logs","/var/log","/etc/logs","/usr/log"],c:1,t:15,cat:"Comandos"},
+  {q:"Que hace el comando 'lsof -i' en Linux?",o:["Lista archivos del sistema","Muestra todas las conexiones de red activas","Instala paquetes de red","Configura la interfaz de red"],c:1,t:20,cat:"Comandos"},
+  {q:"Que navegador usa la red Tor para proteger el anonimato?",o:["LibreWolf","Firefox","Tor Browser","Chromium"],c:2,t:15,cat:"Herramientas"},
+  {q:"Que es BleachBit?",o:["Un antivirus para Linux","Un navegador web seguro","Herramienta que elimina archivos innecesarios como cache y cookies","Un gestor de contrasenas"],c:2,t:20,cat:"Herramientas"},
+  {q:"Que hace apt-cache show?",o:["Instala un paquete","Muestra info completa: version, descripcion, dependencias","Elimina un paquete del sistema","Actualiza todos los paquetes"],c:1,t:20,cat:"Paquetes .deb"},
+  {q:"Que son las dependencias en paquetes Linux?",o:["Virus que se adjuntan a los paquetes","Librerias y paquetes obligatorios que un programa necesita","Archivos temporales del sistema","Actualizaciones pendientes"],c:1,t:20,cat:"Paquetes .deb"},
+  {q:"Que tipo de malware se disfraza de software legitimo?",o:["Virus","Gusano (Worm)","Troyano","Adware"],c:2,t:15,cat:"Malware"},
+  {q:"Cual es una senal de infeccion por malware?",o:["El equipo funciona mas rapido","El equipo va muy lento sin razon aparente","Se actualizan los programas automaticamente","Aparecen nuevas actualizaciones"],c:1,t:15,cat:"Malware"},
+  {q:"Que extension bloquea rastreadores segun la EFF?",o:["uBlock Origin","Privacy Badger","AdBlock Plus","NoScript"],c:1,t:20,cat:"Herramientas"},
+  {q:"Que principio garantiza acceso solo a recursos necesarios?",o:["Principio de maximo acceso","Principio de minimo privilegio","Principio de transparencia total","Principio de redundancia"],c:1,t:20,cat:"Seguridad"},
+  {q:"Que hace 'find / -perm -4000' en Linux?",o:["Busca archivos mayores a 4000 bytes","Busca archivos con permiso SUID que podrian ser explotados","Encuentra 4000 archivos aleatorios","Busca archivos creados hace 4000 dias"],c:1,t:20,cat:"Comandos"},
+  {q:"Donde se configuran los repositorios en Linux?",o:["/home/user/repos","/etc/apt/sources.list","/var/repos/config","/usr/local/repos"],c:1,t:15,cat:"Paquetes .deb"},
+  {q:"Que caracteristica del malware le permite cambiar su codigo?",o:["Persistencia","Polimorfismo","Autorreplicacion","Escalada de privilegios"],c:1,t:20,cat:"Malware"},
+  {q:"Que comando habilita el firewall UFW en Linux?",o:["sudo firewall start","sudo ufw enable","sudo iptables --on","sudo firewalld activate"],c:1,t:15,cat:"Comandos"},
+  {q:"Cual NO es un vector de propagacion de virus?",o:["Archivos ejecutables infectados","Correos con adjuntos maliciosos","Actualizar el sistema operativo","Descargas de sitios no oficiales"],c:2,t:20,cat:"Virus"}
+];
+
+let peer,conns={},players={},curQ=-1,qStart=0,answers={},timerInt,totalQ=Q.length;
+const roomId='quiz-'+Math.random().toString(36).substr(2,6);
+
+function init(){
+  document.getElementById('q-info').textContent=totalQ+' preguntas cargadas';
+  const dot=document.getElementById('status-dot');
+  const txt=document.getElementById('status-text');
+  dot.className='status-dot off';
+  txt.textContent='Conectando...';
+
+  peer=new Peer(roomId,{debug:0});
+  peer.on('open',id=>{
+    dot.className='status-dot on';
+    txt.textContent='Sala activa: '+id;
+    document.getElementById('room-code').textContent=id.toUpperCase();
+    const base=location.href.replace(/\/[^/]*$/,'/');
+    const url=base+'play.html?room='+id;
+    document.getElementById('join-url').textContent=url;
+    QRCode.toCanvas(document.getElementById('qr-canvas'),url,{width:220,margin:2,color:{dark:'#1a1a2e',light:'#ffffff'}});
+  });
+  peer.on('connection',conn=>{
+    conn.on('data',d=>handlePlayerMsg(conn,d));
+    conn.on('close',()=>{
+      const p=Object.entries(players).find(([k,v])=>v.connId===conn.peer);
+      if(p){delete players[p[0]];delete conns[conn.peer];delete answers[conn.peer];updatePlayerUI();}
+    });
+  });
+  peer.on('error',e=>{dot.className='status-dot off';txt.textContent='Error: '+e.type;});
+}
+
+function handlePlayerMsg(conn,data){
+  if(data.type==='join'){
+    const nick=data.nickname.trim().substring(0,20);
+    if(!nick){conn.send({type:'join-error',msg:'Nickname invalido'});return;}
+    const taken=Object.values(players).some(p=>p.nickname.toLowerCase()===nick.toLowerCase());
+    if(taken){conn.send({type:'join-error',msg:'Nickname en uso'});return;}
+    conns[conn.peer]=conn;
+    players[conn.peer]={nickname:nick,score:0,streak:0,correct:0,total:0,connId:conn.peer};
+    conn.send({type:'joined',nickname:nick});
+    updatePlayerUI();
+  }
+  if(data.type==='answer'&&curQ>=0){
+    if(answers[conn.peer])return;
+    const q=Q[curQ],rt=Date.now()-qStart,ok=data.answer===q.c;
+    const pts=ok?Math.round(500+500*Math.max(0,1-(rt/(q.t*1000)))):0;
+    answers[conn.peer]={answer:data.answer,time:rt,correct:ok,points:pts};
+    const p=players[conn.peer];
+    if(p){if(ok){p.streak++;p.correct++}else{p.streak=0}p.score+=pts;p.total++;
+      conn.send({type:'answer-result',correct:ok,points:pts,streak:p.streak,totalScore:p.score});}
+    updateAnswerCount();
+    if(Object.keys(answers).length>=Object.keys(players).length){clearTimeout(timerInt);setTimeout(showResults,500);}
+  }
+}
+
+function updatePlayerUI(){
+  const n=Object.keys(players).length;
+  document.getElementById('player-count').textContent=n;
+  document.getElementById('btn-start').disabled=n===0;
+  const chips=document.getElementById('chips');
+  chips.innerHTML=Object.values(players).map(p=>'<div class="chip">'+p.nickname+'</div>').join('');
+}
+
+function updateAnswerCount(){
+  document.getElementById('ac').textContent=Object.keys(answers).length;
+  document.getElementById('at').textContent=Object.keys(players).length;
+}
+
+function broadcast(msg){Object.values(conns).forEach(c=>{try{c.send(msg)}catch(e){}});}
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function startGame(){curQ=-1;broadcast({type:'game-started'});nextQuestion();}
+
+function nextQuestion(){
+  curQ++;
+  if(curQ>=totalQ){finishGame();return;}
+  answers={};qStart=Date.now();
+  const q=Q[curQ];
+  show('s-question');
+  document.getElementById('qn').textContent='Pregunta '+(curQ+1)+' / '+totalQ;
+  document.getElementById('qc').textContent=q.cat;
+  document.getElementById('qt').textContent=q.q;
+  const grid=document.getElementById('qo');
+  grid.innerHTML=q.o.map((o,i)=>'<div class="opt-card '+OC[i]+'"><span class="sh">'+SHAPES[i]+'</span><span>'+o+'</span></div>').join('');
+  updateAnswerCount();
+  startTimer(q.t);
+  broadcast({type:'question',index:curQ,total:totalQ,question:q.q,options:q.o,time:q.t,category:q.cat});
+}
+
+function startTimer(sec){
+  clearInterval(timerInt);let left=sec;
+  const c=document.getElementById('tc'),circ=2*Math.PI*50;
+  c.style.strokeDasharray=circ;c.style.strokeDashoffset=0;
+  c.classList.remove('warn','danger');
+  document.getElementById('tt').textContent=sec;
+  timerInt=setInterval(()=>{
+    left--;if(left<0){clearInterval(timerInt);showResults();return;}
+    document.getElementById('tt').textContent=left;
+    c.style.strokeDashoffset=circ*(1-(left/sec));
+    c.classList.remove('warn','danger');
+    if(left<=5)c.classList.add('danger');else if(left<=10)c.classList.add('warn');
+  },1000);
+}
+
+function getLeaderboard(){return Object.values(players).map(p=>({nickname:p.nickname,score:p.score,streak:p.streak})).sort((a,b)=>b.score-a.score);}
+
+function showResults(){
+  clearInterval(timerInt);show('s-results');
+  const q=Q[curQ],dist=[0,0,0,0];
+  Object.values(answers).forEach(a=>{if(a.answer>=0&&a.answer<4)dist[a.answer]++;});
+  const tp=Object.keys(players).length,ac=Object.keys(answers).length,cc=Object.values(answers).filter(a=>a.correct).length;
+  document.getElementById('r-correct').innerHTML='&#10003; '+q.o[q.c];
+  document.getElementById('r-stats').innerHTML=
+    '<div class="stat-card sc"><div class="n">'+cc+'</div><div class="l">Correctas</div></div>'+
+    '<div class="stat-card sw"><div class="n">'+(ac-cc)+'</div><div class="l">Incorrectas</div></div>'+
+    '<div class="stat-card sn"><div class="n">'+(tp-ac)+'</div><div class="l">Sin respuesta</div></div>';
+  const mx=Math.max(...dist,1);
+  document.getElementById('r-dist').innerHTML=dist.map((cnt,i)=>
+    '<div class="dist-item"><div class="dist-bw"><div class="dist-b" style="background:'+COLORS[i]+';height:'+(cnt/mx)*100+'px;'+(i===q.c?'box-shadow:0 0 12px rgba(0,245,160,.5);border:2px solid #00f5a0':'')+'"></div></div><div class="dist-cnt">'+cnt+'</div></div>').join('');
+  const lb=getLeaderboard().slice(0,5);
+  document.getElementById('r-lb').innerHTML=lb.map((p,i)=>
+    '<div class="mini-row"><span class="mini-rk">'+(i+1)+'</span><span class="mini-nm">'+p.nickname+'</span><span class="mini-sc">'+p.score.toLocaleString()+' pts</span></div>').join('');
+  document.getElementById('btn-next').textContent=curQ>=totalQ-1?'Ver Resultados Finales':'Siguiente Pregunta';
+  broadcast({type:'question-results',correctAnswer:q.c,correctText:q.o[q.c]});
+  broadcast({type:'leaderboard',leaderboard:getLeaderboard()});
+}
+
+function showLeaderboard(){
+  show('s-leaderboard');
+  const lb=getLeaderboard(),pos=[1,0,2],medals=['&#129351;','&#129352;','&#129353;'],cls=['p1','p2','p3'];
+  document.getElementById('podium').innerHTML=pos.map(p=>{
+    if(!lb[p])return'';const pl=lb[p];
+    return'<div class="pod-item '+cls[p]+'"><div class="pod-av">'+pl.nickname.charAt(0).toUpperCase()+'</div><div class="pod-nm">'+pl.nickname+'</div><div class="pod-sc">'+pl.score.toLocaleString()+' pts</div><div class="pod-bar"><span style="font-size:1.3rem">'+medals[p]+'</span></div></div>';}).join('');
+  document.getElementById('full-rk').innerHTML=lb.slice(3).map((p,i)=>
+    '<div class="rk-row"><span class="rk-pos">'+(i+4)+'</span><span class="rk-nm">'+p.nickname+'</span><span class="rk-sc">'+p.score.toLocaleString()+' pts</span></div>').join('');
+  document.getElementById('btn-lb-next').textContent=curQ>=totalQ-1?'Ver Resultados Finales':'Siguiente Pregunta';
+  broadcast({type:'show-leaderboard',leaderboard:getLeaderboard()});
+}
+
+function finishGame(){
+  show('s-final');clearInterval(timerInt);
+  const lb=getLeaderboard(),w=lb[0];
+  document.getElementById('winner-box').innerHTML='<div class="winner-crown">&#128081;</div><div class="winner-name">'+(w?w.nickname:'-')+'</div><div class="winner-score">'+(w?w.score.toLocaleString()+' puntos':'')+'</div>';
+  const stats=Object.values(players).sort((a,b)=>b.score-a.score);
+  const mx=Math.max(...stats.map(p=>p.score),1);
+  document.getElementById('final-rows').innerHTML=stats.map((p,i)=>{
+    const acc=p.total>0?Math.round((p.correct/p.total)*100):0;
+    const bc=acc>=70?'#00f5a0':acc>=40?'#f7b731':'#ff6b6b';
+    return'<div class="final-row"><span class="f-pos">'+(i+1)+'</span><span class="f-nm">'+p.nickname+'</span><span class="f-acc">'+acc+'%</span><div class="f-bar"><div class="f-bar-fill" style="width:'+(p.score/mx)*100+'%;background:'+bc+'"></div></div><span class="f-sc">'+p.score.toLocaleString()+'</span></div>';}).join('');
+  broadcast({type:'game-finished',leaderboard:lb,playerStats:stats.map(p=>({nickname:p.nickname,score:p.score,correct:p.correct,total:p.total,accuracy:p.total>0?Math.round((p.correct/p.total)*100):0}))});
+}
+
+function resetGame(){
+  Object.values(players).forEach(p=>{p.score=0;p.streak=0;p.correct=0;p.total=0;});
+  curQ=-1;answers={};
+  broadcast({type:'game-reset'});
+  show('s-lobby');updatePlayerUI();
+}
+
+init();
+</script>
+</body>
+</html>
