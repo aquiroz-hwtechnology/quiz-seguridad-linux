@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quiz Master - Panel de Control</title>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a23;color:#fff;min-height:100vh;overflow-x:hidden}
@@ -123,7 +122,7 @@
     <div class="connection-status"><span class="status-dot" id="status-dot"></span><span id="status-text">Conectando...</span></div>
     <div class="qr-box">
       <p style="margin-bottom:10px;font-weight:600;color:#a0a0cc">Escanea para unirte</p>
-      <canvas id="qr-canvas"></canvas>
+      <img id="qr-img" width="220" height="220" style="border-radius:8px" alt="QR Code">
       <div class="room-code" id="room-code"></div>
       <div class="join-url" id="join-url"></div>
       <div class="join-label">o ingresa esta URL en tu navegador</div>
@@ -237,7 +236,7 @@ function init(){
     const base=location.href.replace(/\/[^/]*$/,'/');
     const url=base+'play.html?room='+id;
     document.getElementById('join-url').textContent=url;
-    QRCode.toCanvas(document.getElementById('qr-canvas'),url,{width:220,margin:2,color:{dark:'#1a1a2e',light:'#ffffff'}});
+    document.getElementById('qr-img').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=1a1a2e&data='+encodeURIComponent(url);
   });
   peer.on('connection',conn=>{
     conn.on('data',d=>handlePlayerMsg(conn,d));
