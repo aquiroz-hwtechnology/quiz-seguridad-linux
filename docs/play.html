@@ -16,62 +16,52 @@
     .avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 20px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:900;border:3px solid rgba(102,126,234,.5);transition:all .3s}
     .inp-g{position:relative;margin-bottom:16px}
     .inp{width:100%;padding:16px 18px;border:2px solid rgba(102,126,234,.4);background:rgba(255,255,255,.06);border-radius:12px;color:#fff;font-family:inherit;font-size:1.1rem;font-weight:600;text-align:center;outline:none;transition:border-color .3s}
-    .inp::placeholder{color:rgba(255,255,255,.3)}
-    .inp:focus{border-color:#667eea;background:rgba(102,126,234,.1)}
+    .inp::placeholder{color:rgba(255,255,255,.3)}.inp:focus{border-color:#667eea;background:rgba(102,126,234,.1)}
     .cc{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.7rem;color:#555}
     .btn{display:inline-block;width:100%;padding:16px;border:none;border-radius:12px;font-family:inherit;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:2px}
     .btn-join{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 8px 30px rgba(102,126,234,.4)}
-    .btn-join:hover{transform:translateY(-2px)}
-    .btn-join:active{transform:translateY(0)}
-    .btn-join:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .btn-join:hover{transform:translateY(-2px)}.btn-join:active{transform:translateY(0)}.btn-join:disabled{opacity:.4;cursor:not-allowed;transform:none}
     .err{color:#ff6b6b;font-size:.8rem;margin-top:8px;min-height:18px}
-    /* Waiting */
     .w-icon{font-size:3.5rem;margin-bottom:12px;animation:bounce 2s infinite}
     @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
     .w-name{font-size:1.6rem;font-weight:900;margin-bottom:6px;background:linear-gradient(135deg,#00f5a0,#00d9f5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .w-msg{color:#a0a0cc;font-size:.9rem}
     .fun{margin-top:25px;padding:16px;background:rgba(255,255,255,.05);border-radius:12px;border-left:4px solid #667eea;text-align:left}
-    .fun-l{font-size:.7rem;color:#667eea;font-weight:700;margin-bottom:4px;text-transform:uppercase}
-    .fun-t{font-size:.85rem;color:#ccc;line-height:1.4}
-    /* Question */
+    .fun-l{font-size:.7rem;color:#667eea;font-weight:700;margin-bottom:4px;text-transform:uppercase}.fun-t{font-size:.85rem;color:#ccc;line-height:1.4}
     .qh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-    .qn{font-size:.8rem;color:#a0a0cc}
-    .qcat{background:rgba(102,126,234,.3);padding:3px 12px;border-radius:12px;font-size:.7rem;font-weight:600;color:#667eea}
+    .qn{font-size:.8rem;color:#a0a0cc}.qcat{background:rgba(102,126,234,.3);padding:3px 12px;border-radius:12px;font-size:.7rem;font-weight:600;color:#667eea}
     .qtl{font-size:2.2rem;font-weight:900;margin-bottom:8px}
     .qtbar{width:100%;height:7px;background:rgba(255,255,255,.1);border-radius:4px;margin-bottom:12px;overflow:hidden}
     .qtfill{height:100%;border-radius:4px;background:linear-gradient(90deg,#00f5a0,#00d9f5);transition:width 1s linear}
-    .qtfill.warn{background:linear-gradient(90deg,#f7b731,#ffa502)}
-    .qtfill.danger{background:linear-gradient(90deg,#ff6b6b,#ee5a24)}
+    .qtfill.warn{background:linear-gradient(90deg,#f7b731,#ffa502)}.qtfill.danger{background:linear-gradient(90deg,#ff6b6b,#ee5a24)}
     .qtxt{font-size:1.05rem;font-weight:700;margin-bottom:14px;line-height:1.3;padding:14px;background:rgba(255,255,255,.05);border-radius:12px}
     .qopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .qo{padding:18px 8px;border-radius:12px;border:none;font-family:inherit;font-size:.9rem;font-weight:700;color:#fff;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:80px}
-    .qo:active{transform:scale(.95)}
-    .qo.sel{opacity:.7;transform:scale(.95)}
-    .qo.dis{pointer-events:none;opacity:.5}
-    .qo .sh{font-size:1.6rem}
-    .qo .otx{font-size:.78rem;line-height:1.15}
+    .qo:active{transform:scale(.95)}.qo.sel{opacity:.7;transform:scale(.95)}.qo.dis{pointer-events:none;opacity:.5}
+    .qo .sh{font-size:1.6rem}.qo .otx{font-size:.78rem;line-height:1.15}
     .o0{background:#e21b3c}.o1{background:#1368ce}.o2{background:#d89e00}.o3{background:#26890c}
     /* Result */
-    .ri{font-size:4.5rem;margin-bottom:12px}
-    .ri.ok{animation:cpop .5s ease}
-    .ri.no{animation:shake .5s ease}
+    .ri{font-size:4rem;margin-bottom:8px}
+    .ri.ok{animation:cpop .5s ease}.ri.no{animation:shake .5s ease}
     @keyframes cpop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
     @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-    .rtxt{font-size:1.3rem;font-weight:900;margin-bottom:6px}
-    .rtxt.ok{color:#00f5a0}.rtxt.no{color:#ff6b6b}
+    .rmsg{font-size:1rem;font-weight:700;margin-bottom:6px;padding:8px 16px;border-radius:10px;display:inline-block}
+    .rmsg.ok{background:rgba(0,245,160,.15);color:#00f5a0}.rmsg.no{background:rgba(255,107,107,.15);color:#ff6b6b}
+    .rtxt{font-size:1.3rem;font-weight:900;margin:6px 0}.rtxt.ok{color:#00f5a0}.rtxt.no{color:#ff6b6b}
     .rpts{font-size:2.2rem;font-weight:900;margin:8px 0}
     .rpts.ok{background:linear-gradient(135deg,#00f5a0,#00d9f5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .rstrk{color:#f7b731;font-size:.9rem;font-weight:600}
-    .rtot{color:#a0a0cc;font-size:.85rem;margin-top:12px}
-    .rwait{color:#667eea;font-size:.8rem;margin-top:18px;animation:pulse 1.5s infinite}
+    .rcorrect{font-size:.85rem;color:#a0a0cc;margin-top:8px;padding:8px;background:rgba(255,255,255,.05);border-radius:8px}
+    .rcorrect strong{color:#00f5a0}
+    .rexp{margin-top:10px;padding:12px;background:rgba(102,126,234,.1);border:1px solid rgba(102,126,234,.25);border-radius:10px;text-align:left;font-size:.8rem;line-height:1.4;color:#ccc}
+    .rexp strong{color:#667eea}
+    .rtot{color:#a0a0cc;font-size:.85rem;margin-top:10px}
+    .rwait{color:#667eea;font-size:.8rem;margin-top:15px;animation:pulse 1.5s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-    /* LB player */
     .lpt{font-size:1.3rem;font-weight:900;margin-bottom:15px;color:#ffd700}
     .lppos{font-size:4.5rem;font-weight:900;margin:10px 0;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .lpl{color:#a0a0cc;font-size:.85rem}
-    .lpsc{font-size:1.2rem;font-weight:700;color:#00f5a0;margin-top:8px}
+    .lpl{color:#a0a0cc;font-size:.85rem}.lpsc{font-size:1.2rem;font-weight:700;color:#00f5a0;margin-top:8px}
     .lpnx{color:#667eea;font-size:.8rem;margin-top:20px;animation:pulse 1.5s infinite}
-    /* Final player */
     .fpt{font-size:1.6rem;font-weight:900;margin-bottom:15px}
     .fprk{font-size:5rem;font-weight:900;margin:8px 0}
     .fprk.f1{background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -79,36 +69,26 @@
     .fpsc{font-size:1.3rem;font-weight:700;color:#00f5a0}
     .fpsg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
     .fps{background:rgba(255,255,255,.06);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.08)}
-    .fps-n{font-size:1.6rem;font-weight:900}
-    .fps-l{font-size:.7rem;color:#a0a0cc;margin-top:2px}
-    .dc-icon{font-size:2.5rem;margin-bottom:12px}
-    .dc-txt{font-size:1rem;color:#ff6b6b;font-weight:600;margin-bottom:16px}
+    .fps-n{font-size:1.6rem;font-weight:900}.fps-l{font-size:.7rem;color:#a0a0cc;margin-top:2px}
+    .dc-icon{font-size:2.5rem;margin-bottom:12px}.dc-txt{font-size:1rem;color:#ff6b6b;font-weight:600;margin-bottom:16px}
     .btn-rc{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
   </style>
 </head>
 <body>
 <div class="bg"></div>
 <div class="app">
-
   <div id="s-join" class="screen active">
-    <div class="logo">QUIZ</div>
-    <div class="sub">Seguridad Informatica & GNU/Linux</div>
+    <div class="logo">QUIZ</div><div class="sub">Seguridad Informatica & GNU/Linux</div>
     <div class="avatar" id="avatar">?</div>
-    <div class="inp-g">
-      <input type="text" class="inp" id="nick-inp" placeholder="Tu nickname" maxlength="20" autocomplete="off" autofocus>
-      <span class="cc" id="cc">0/20</span>
-    </div>
+    <div class="inp-g"><input type="text" class="inp" id="nick-inp" placeholder="Tu nickname" maxlength="20" autocomplete="off" autofocus><span class="cc" id="cc">0/20</span></div>
     <button class="btn btn-join" id="btn-join" disabled>Unirse</button>
     <div class="err" id="err"></div>
   </div>
-
   <div id="s-wait" class="screen">
-    <div class="w-icon">&#127918;</div>
-    <div class="w-name" id="w-name"></div>
+    <div class="w-icon">&#127918;</div><div class="w-name" id="w-name"></div>
     <div class="w-msg">Esperando a que el profesor inicie el juego...</div>
     <div class="fun"><div class="fun-l">Sabias que...</div><div class="fun-t" id="fun-t"></div></div>
   </div>
-
   <div id="s-question" class="screen">
     <div class="qh"><span class="qn" id="pqn"></span><span class="qcat" id="pqc"></span></div>
     <div class="qtl" id="pqtl">20</div>
@@ -116,157 +96,126 @@
     <div class="qtxt" id="pqt"></div>
     <div class="qopts" id="pqo"></div>
   </div>
-
   <div id="s-result" class="screen">
     <div class="ri" id="ri"></div>
+    <div class="rmsg" id="rmsg"></div>
     <div class="rtxt" id="rtxt"></div>
     <div class="rpts" id="rpts"></div>
     <div class="rstrk" id="rstrk"></div>
+    <div class="rcorrect" id="rcorrect"></div>
+    <div class="rexp" id="rexp"></div>
     <div class="rtot" id="rtot"></div>
     <div class="rwait">Esperando siguiente pregunta...</div>
   </div>
-
   <div id="s-lb" class="screen">
-    <div class="lpt">RANKING</div>
-    <div class="lppos" id="lppos">#1</div>
-    <div class="lpl">Tu posicion</div>
-    <div class="lpsc" id="lpsc">0 pts</div>
+    <div class="lpt">RANKING</div><div class="lppos" id="lppos">#1</div>
+    <div class="lpl">Tu posicion</div><div class="lpsc" id="lpsc">0 pts</div>
     <div class="lpnx">Preparando siguiente pregunta...</div>
   </div>
-
   <div id="s-final" class="screen">
-    <div class="fpt">Juego Terminado</div>
-    <div class="fprk" id="fprk">#1</div>
-    <div class="fpsc" id="fpsc">0 puntos</div>
-    <div class="fpsg" id="fpsg"></div>
+    <div class="fpt">Juego Terminado</div><div class="fprk" id="fprk">#1</div>
+    <div class="fpsc" id="fpsc">0 puntos</div><div class="fpsg" id="fpsg"></div>
   </div>
-
   <div id="s-dc" class="screen">
-    <div class="dc-icon">&#128225;</div>
-    <div class="dc-txt">Conexion perdida</div>
+    <div class="dc-icon">&#128225;</div><div class="dc-txt">Conexion perdida</div>
     <button class="btn btn-rc" onclick="location.reload()">Reconectar</button>
   </div>
-
 </div>
 <script>
-const SHAPES=['&#9650;','&#9670;','&#9679;','&#9632;'];
-const OC=['o0','o1','o2','o3'];
-const FACTS=[
-  "El primer virus informatico, Creeper, fue creado en 1971.",
-  "ClamAV puede escanear mas de 1 millon de virus conocidos.",
-  "Linux es mas seguro por su modelo de permisos y diversidad de distribuciones.",
-  "El comando 'sudo' significa 'Super User DO'.",
-  "Los paquetes .deb son el formato estandar en distribuciones basadas en Debian.",
-  "El termino Malware viene de 'Malicious Software'.",
-  "Wireshark es una de las herramientas mas usadas para analisis de trafico de red.",
-  "El principio de minimo privilegio: solo dar acceso a lo estrictamente necesario.",
-  "Tor Browser usa una red de servidores para ocultar tu direccion IP.",
-  "Un rootkit puede ocultarse tan profundamente que es casi indetectable."
-];
+const SHAPES=['&#9650;','&#9670;','&#9679;','&#9632;'],OC=['o0','o1','o2','o3'];
+const FACTS=["El primer virus informatico, Creeper, fue creado en 1971.","ClamAV puede escanear mas de 1 millon de virus conocidos.","Linux es mas seguro por su modelo de permisos y diversidad.","El comando 'sudo' significa 'Super User DO'.","Los paquetes .deb son el formato estandar en Debian/Ubuntu.","Malware viene de 'Malicious Software'.","Wireshark es la herramienta mas usada para analisis de red.","Principio de minimo privilegio: solo acceso a lo necesario.","Tor Browser oculta tu IP usando servidores voluntarios.","Un rootkit puede ser casi indetectable sin herramientas especializadas."];
+const MSGS_OK=["Excelente! Eres un crack!","Genial! Sigue asi!","Correcto! Impresionante!","Muy bien! Gran conocimiento!","Perfecto! Eres imparable!","Brillante! Lo dominas!","Fantastico! Sigue brillando!","Increible! Respuesta perfecta!"];
+const MSGS_NO=["No te preocupes, sigue intentando!","Casi! La proxima sera!","Animo! Aprendemos de los errores!","No pasa nada, sigue adelante!","A seguir estudiando! Tu puedes!","Error esta vez, pero vas a mejorar!"];
+
+// === AUDIO ===
+const actx=new(window.AudioContext||window.webkitAudioContext)();
+function playTone(f,d,type='sine',v=.3){const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.stop(actx.currentTime+d);}
+function sndOk(){playTone(523,.1);setTimeout(()=>playTone(659,.1),100);setTimeout(()=>playTone(784,.2),200);}
+function sndNo(){playTone(330,.15,'square',.2);setTimeout(()=>playTone(262,.3,'square',.2),150);}
+function sndTick(){playTone(880,.05,'sine',.15);}
+function sndJoin(){playTone(440,.1);setTimeout(()=>playTone(554,.1),120);setTimeout(()=>playTone(659,.15),240);}
+function sndFinish(){[0,150,300,450,600].forEach((d,i)=>setTimeout(()=>playTone([523,659,784,1047,1319][i],.2),d));}
 
 let peer,conn,myNick='',answered=false,timerInt;
-const params=new URLSearchParams(location.search);
-const roomId=params.get('room');
+const params=new URLSearchParams(location.search),roomId=params.get('room');
+const inp=document.getElementById('nick-inp'),btnJ=document.getElementById('btn-join'),ccEl=document.getElementById('cc'),avEl=document.getElementById('avatar');
 
-const inp=document.getElementById('nick-inp');
-const btnJ=document.getElementById('btn-join');
-const ccEl=document.getElementById('cc');
-const avEl=document.getElementById('avatar');
-
-inp.addEventListener('input',()=>{
-  const v=inp.value.trim();
-  ccEl.textContent=inp.value.length+'/20';
-  btnJ.disabled=v.length===0;
-  avEl.textContent=v.length>0?v.charAt(0).toUpperCase():'?';
-  document.getElementById('err').textContent='';
-});
+inp.addEventListener('input',()=>{const v=inp.value.trim();ccEl.textContent=inp.value.length+'/20';btnJ.disabled=v.length===0;avEl.textContent=v.length>0?v.charAt(0).toUpperCase():'?';document.getElementById('err').textContent='';});
 inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!btnJ.disabled)joinGame();});
 btnJ.addEventListener('click',joinGame);
 
 function joinGame(){
-  const nick=inp.value.trim();
-  if(!nick||!roomId)return;
-  btnJ.disabled=true;btnJ.textContent='Conectando...';
-  document.getElementById('err').textContent='';
-
+  const nick=inp.value.trim();if(!nick||!roomId)return;
+  btnJ.disabled=true;btnJ.textContent='Conectando...';document.getElementById('err').textContent='';
   peer=new Peer(undefined,{debug:0});
   peer.on('open',()=>{
     conn=peer.connect(roomId,{reliable:true});
     conn.on('open',()=>{conn.send({type:'join',nickname:nick});});
-    conn.on('data',d=>handleMsg(d));
-    conn.on('close',()=>show('s-dc'));
-    conn.on('error',()=>show('s-dc'));
+    conn.on('data',d=>handleMsg(d));conn.on('close',()=>show('s-dc'));conn.on('error',()=>show('s-dc'));
     setTimeout(()=>{if(!myNick){document.getElementById('err').textContent='No se pudo conectar. Verifica el codigo.';btnJ.disabled=false;btnJ.textContent='UNIRSE';}},8000);
   });
-  peer.on('error',()=>{document.getElementById('err').textContent='Error de conexion.';btnJ.disabled=false;btnJ.textContent='UNIRSE';});
+  peer.on('error',()=>{document.getElementById('err').textContent='Error de conexion. Usa Chrome en vez de Brave.';btnJ.disabled=false;btnJ.textContent='UNIRSE';});
 }
 
 function handleMsg(d){
   if(d.type==='join-error'){document.getElementById('err').textContent=d.msg;btnJ.disabled=false;btnJ.textContent='UNIRSE';}
-  if(d.type==='joined'){myNick=d.nickname;show('s-wait');document.getElementById('w-name').textContent=myNick;document.getElementById('fun-t').textContent=FACTS[Math.floor(Math.random()*FACTS.length)];}
+  if(d.type==='joined'){myNick=d.nickname;sndJoin();show('s-wait');document.getElementById('w-name').textContent=myNick;document.getElementById('fun-t').textContent=FACTS[Math.floor(Math.random()*FACTS.length)];}
   if(d.type==='question'){
     answered=false;show('s-question');
     document.getElementById('pqn').textContent=(d.index+1)+' / '+d.total;
-    document.getElementById('pqc').textContent=d.category;
-    document.getElementById('pqt').textContent=d.question;
+    document.getElementById('pqc').textContent=d.category;document.getElementById('pqt').textContent=d.question;
     const g=document.getElementById('pqo');
     g.innerHTML=d.options.map((o,i)=>'<button class="qo '+OC[i]+'" data-i="'+i+'"><span class="sh">'+SHAPES[i]+'</span><span class="otx">'+o+'</span></button>').join('');
-    g.querySelectorAll('.qo').forEach(b=>b.addEventListener('click',()=>submitAnswer(parseInt(b.dataset.i),b)));
+    g.querySelectorAll('.qo').forEach(b=>b.addEventListener('click',()=>{actx.resume();submitAnswer(parseInt(b.dataset.i),b);}));
     startPTimer(d.time);
   }
   if(d.type==='answer-result'){
     clearInterval(timerInt);show('s-result');
-    const ri=document.getElementById('ri'),rt=document.getElementById('rtxt'),rp=document.getElementById('rpts'),rs=document.getElementById('rstrk'),rtl=document.getElementById('rtot');
-    if(d.correct){ri.textContent='&#127881;';ri.className='ri ok';rt.textContent='Correcto!';rt.className='rtxt ok';rp.textContent='+'+d.points;rp.className='rpts ok';rs.textContent=d.streak>1?'&#128293; Racha de '+d.streak:'';}
-    else{ri.textContent='&#128542;';ri.className='ri no';rt.textContent='Incorrecto';rt.className='rtxt no';rp.textContent='+0';rp.className='rpts';rs.textContent='';}
+    const ri=document.getElementById('ri'),rm=document.getElementById('rmsg'),rt=document.getElementById('rtxt'),rp=document.getElementById('rpts'),rs=document.getElementById('rstrk'),rtl=document.getElementById('rtot'),rc=document.getElementById('rcorrect'),re=document.getElementById('rexp');
+    if(d.correct){
+      sndOk();ri.textContent='&#127881;';ri.className='ri ok';
+      rm.textContent=MSGS_OK[Math.floor(Math.random()*MSGS_OK.length)];rm.className='rmsg ok';
+      rt.textContent='Correcto!';rt.className='rtxt ok';rp.textContent='+'+d.points;rp.className='rpts ok';
+      rs.textContent=d.streak>1?'&#128293; Racha de '+d.streak+' aciertos!':'';
+      rc.innerHTML='';
+    }else{
+      sndNo();ri.textContent='&#128557;';ri.className='ri no';
+      rm.textContent=MSGS_NO[Math.floor(Math.random()*MSGS_NO.length)];rm.className='rmsg no';
+      rt.textContent='Incorrecto';rt.className='rtxt no';rp.textContent='+0';rp.className='rpts';rs.textContent='';
+      rc.innerHTML='La respuesta correcta era: <strong>'+d.correctText+'</strong>';
+    }
+    re.innerHTML='<strong>&#128218; Por que?</strong> '+d.explanation;
     rtl.textContent='Puntuacion total: '+d.totalScore.toLocaleString();
   }
   if(d.type==='leaderboard'||d.type==='show-leaderboard'){
-    show('s-lb');
-    const pos=d.leaderboard.findIndex(p=>p.nickname===myNick);
-    document.getElementById('lppos').textContent='#'+(pos+1);
-    const me=d.leaderboard[pos];
+    show('s-lb');const pos=d.leaderboard.findIndex(p=>p.nickname===myNick);
+    document.getElementById('lppos').textContent='#'+(pos+1);const me=d.leaderboard[pos];
     document.getElementById('lpsc').textContent=me?me.score.toLocaleString()+' pts':'0 pts';
   }
   if(d.type==='game-finished'){
-    clearInterval(timerInt);show('s-final');
-    const pos=d.leaderboard.findIndex(p=>p.nickname===myNick);
-    const rk=document.getElementById('fprk');
-    rk.textContent='#'+(pos+1);
-    rk.className=pos===0?'fprk f1':pos<3?'fprk f3':'fprk';
+    clearInterval(timerInt);sndFinish();show('s-final');
+    const pos=d.leaderboard.findIndex(p=>p.nickname===myNick),rk=document.getElementById('fprk');
+    rk.textContent='#'+(pos+1);rk.className=pos===0?'fprk f1':pos<3?'fprk f3':'fprk';
     const me=d.playerStats.find(p=>p.nickname===myNick);
     document.getElementById('fpsc').textContent=me?me.score.toLocaleString()+' puntos':'0 puntos';
-    if(me){document.getElementById('fpsg').innerHTML=
-      '<div class="fps"><div class="fps-n" style="color:#00f5a0">'+me.correct+'</div><div class="fps-l">Correctas</div></div>'+
-      '<div class="fps"><div class="fps-n" style="color:#ff6b6b">'+(me.total-me.correct)+'</div><div class="fps-l">Incorrectas</div></div>'+
-      '<div class="fps"><div class="fps-n" style="color:#667eea">'+me.accuracy+'%</div><div class="fps-l">Precision</div></div>'+
-      '<div class="fps"><div class="fps-n" style="color:#ffd700">#'+(pos+1)+'</div><div class="fps-l">Posicion Final</div></div>';}
+    if(me){document.getElementById('fpsg').innerHTML='<div class="fps"><div class="fps-n" style="color:#00f5a0">'+me.correct+'</div><div class="fps-l">Correctas</div></div><div class="fps"><div class="fps-n" style="color:#ff6b6b">'+(me.total-me.correct)+'</div><div class="fps-l">Incorrectas</div></div><div class="fps"><div class="fps-n" style="color:#667eea">'+me.accuracy+'%</div><div class="fps-l">Precision</div></div><div class="fps"><div class="fps-n" style="color:#ffd700">#'+(pos+1)+'</div><div class="fps-l">Posicion</div></div>';}
   }
   if(d.type==='game-reset'){show('s-wait');document.getElementById('fun-t').textContent=FACTS[Math.floor(Math.random()*FACTS.length)];}
 }
 
-function submitAnswer(i,btn){
-  if(answered)return;answered=true;
-  document.querySelectorAll('.qo').forEach(b=>b.classList.add('dis'));
-  btn.classList.add('sel');btn.style.opacity='1';btn.style.transform='scale(1.05)';
-  conn.send({type:'answer',answer:i});
-}
+function submitAnswer(i,btn){if(answered)return;answered=true;actx.resume();document.querySelectorAll('.qo').forEach(b=>b.classList.add('dis'));btn.classList.add('sel');btn.style.opacity='1';btn.style.transform='scale(1.05)';conn.send({type:'answer',answer:i});}
 
 function startPTimer(sec){
-  clearInterval(timerInt);let left=sec;
-  const f=document.getElementById('pqf'),tl=document.getElementById('pqtl');
+  clearInterval(timerInt);let left=sec;const f=document.getElementById('pqf'),tl=document.getElementById('pqtl');
   f.style.width='100%';f.classList.remove('warn','danger');tl.textContent=sec;
-  timerInt=setInterval(()=>{
-    left--;if(left<0){clearInterval(timerInt);if(!answered){answered=true;document.querySelectorAll('.qo').forEach(b=>b.classList.add('dis'));}return;}
-    tl.textContent=left;f.style.width=(left/sec)*100+'%';
-    f.classList.remove('warn','danger');
-    if(left<=5)f.classList.add('danger');else if(left<=10)f.classList.add('warn');
+  timerInt=setInterval(()=>{left--;if(left<0){clearInterval(timerInt);if(!answered){answered=true;document.querySelectorAll('.qo').forEach(b=>b.classList.add('dis'));}return;}
+    tl.textContent=left;f.style.width=(left/sec)*100+'%';f.classList.remove('warn','danger');
+    if(left<=5){f.classList.add('danger');sndTick();}else if(left<=10)f.classList.add('warn');
   },1000);
 }
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-
-if(!roomId){document.getElementById('err').textContent='Codigo de sala no encontrado. Escanea el QR nuevamente.';}
+if(!roomId)document.getElementById('err').textContent='Codigo de sala no encontrado. Escanea el QR nuevamente.';
 </script>
 </body>
 </html>
