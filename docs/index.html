@@ -158,8 +158,8 @@ function sndTick(){playTone(880,.05,'sine',.15);}
 function sndStart(){playTone(440,.1);setTimeout(()=>playTone(554,.1),120);setTimeout(()=>playTone(659,.1),240);setTimeout(()=>playTone(880,.25),360);}
 function sndFinish(){[0,150,300,450,600].forEach((d,i)=>setTimeout(()=>playTone([523,659,784,1047,1319][i],.2),d));}
 
-// === QUESTIONS WITH EXPLANATIONS ===
-const Q=[
+// === QUESTIONS: load from localStorage (admin) or use defaults ===
+const Q_DEFAULTS=[
   {q:"Que es un virus informatico?",o:["Un programa que optimiza el sistema","Un programa malicioso que se replica y causa danos","Un tipo de hardware defectuoso","Una actualizacion del sistema operativo"],c:1,t:20,cat:"Virus",exp:"Un virus informatico es un programa malicioso que se adjunta a archivos legitimos y se replica al ejecutarlos. A diferencia de un programa normal, su objetivo es danar, robar informacion o interrumpir el sistema. Las otras opciones describen funciones beneficas o hardware, no software malicioso."},
   {q:"Cual es una caracteristica fundamental de un virus informatico?",o:["No necesita un archivo huesped","Se ejecuta de forma independiente","Necesita un huesped (archivo o programa) para reproducirse","Solo afecta a hardware"],c:2,t:20,cat:"Virus",exp:"A diferencia de un gusano (worm) que se propaga solo, un virus NECESITA un archivo huesped para adjuntarse y replicarse. Sin un programa o archivo que lo transporte, el virus no puede ejecutarse ni propagarse."},
   {q:"Que comando se usa en Linux para escanear todo el sistema con ClamAV?",o:["clamscan -r /","clamav --scan-all","sudo scan-virus /","antivirus --check /"],c:0,t:20,cat:"Comandos",exp:"'clamscan -r /' es el comando correcto: 'clamscan' es el ejecutable de ClamAV, '-r' activa el escaneo recursivo (subcarpetas), y '/' indica la raiz del sistema. Los otros comandos no existen en Linux."},
@@ -192,6 +192,7 @@ const Q=[
   {q:"Cual NO es un vector de propagacion de virus?",o:["Archivos ejecutables infectados","Correos con adjuntos maliciosos","Actualizar el sistema operativo","Descargas de sitios no oficiales"],c:2,t:20,cat:"Virus",exp:"Actualizar el sistema operativo es una MEDIDA DE PROTECCION, no un vector de ataque. Las actualizaciones corrigen vulnerabilidades. Los otros tres son vectores clasicos por donde los virus se propagan e infectan sistemas."}
 ];
 
+const Q=(()=>{try{const s=localStorage.getItem('quiz_custom_questions');if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length>0)return p;}}catch(e){}return Q_DEFAULTS;})();
 let peer,conns={},players={},curQ=-1,qStart=0,answers={},timerInt,totalQ=Q.length;
 const roomId='quiz-'+Math.random().toString(36).substr(2,6);
 

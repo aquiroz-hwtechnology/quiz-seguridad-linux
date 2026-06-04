@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Master - Administracion</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a23;color:#fff;min-height:100vh}
+    .bg{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 50%,rgba(120,0,255,.12) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(0,200,255,.08) 0%,transparent 50%);z-index:0}
+    .container{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:20px}
+    .header{text-align:center;margin-bottom:30px}
+    .logo{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sub{color:#a0a0cc;font-size:.9rem;margin-top:4px}
+
+    /* Login */
+    #login{text-align:center;padding-top:80px}
+    .login-box{background:rgba(255,255,255,.05);border-radius:16px;padding:30px;max-width:400px;margin:0 auto;border:1px solid rgba(255,255,255,.1)}
+    .login-box h2{font-size:1.3rem;margin-bottom:20px;color:#667eea}
+    .login-icon{font-size:3rem;margin-bottom:15px}
+
+    /* Panel */
+    #panel{display:none}
+    .tabs{display:flex;gap:5px;margin-bottom:20px;flex-wrap:wrap}
+    .tab{padding:10px 20px;border:none;border-radius:10px 10px 0 0;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;background:rgba(255,255,255,.05);color:#a0a0cc;transition:all .2s}
+    .tab.active{background:rgba(102,126,234,.2);color:#667eea;border-bottom:2px solid #667eea}
+    .tab-content{display:none;background:rgba(255,255,255,.03);border-radius:0 14px 14px 14px;padding:20px;border:1px solid rgba(255,255,255,.08)}
+    .tab-content.active{display:block}
+
+    /* Forms */
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:.8rem;color:#a0a0cc;margin-bottom:4px;font-weight:600}
+    .form-input{width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);border-radius:8px;color:#fff;font-family:inherit;font-size:.9rem;outline:none;transition:border .2s}
+    .form-input:focus{border-color:#667eea}
+    textarea.form-input{resize:vertical;min-height:60px}
+    select.form-input{appearance:auto}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .opt-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+    .opt-label{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0}
+    .opt-label.ol0{background:#e21b3c}.opt-label.ol1{background:#1368ce}.opt-label.ol2{background:#d89e00}.opt-label.ol3{background:#26890c}
+    .opt-radio{margin-left:8px;accent-color:#00f5a0;width:18px;height:18px;cursor:pointer}
+    .opt-correct-label{font-size:.7rem;color:#a0a0cc;white-space:nowrap}
+
+    /* Buttons */
+    .btn{padding:10px 24px;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(102,126,234,.4)}
+    .btn-success{background:linear-gradient(135deg,#00f5a0,#00d9f5);color:#0a0a23}
+    .btn-danger{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff}
+    .btn-outline{background:transparent;border:1px solid rgba(255,255,255,.2);color:#a0a0cc}
+    .btn-outline:hover{border-color:#667eea;color:#667eea}
+    .btn-sm{padding:6px 14px;font-size:.8rem}
+    .btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+    /* Question list */
+    .q-list{max-height:500px;overflow-y:auto;padding-right:5px}
+    .q-list::-webkit-scrollbar{width:6px}.q-list::-webkit-scrollbar-track{background:transparent}.q-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+    .q-item{background:rgba(255,255,255,.04);border-radius:10px;padding:14px;margin-bottom:8px;border:1px solid rgba(255,255,255,.06);transition:all .2s}
+    .q-item:hover{border-color:rgba(102,126,234,.3)}
+    .q-item-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+    .q-item-num{font-size:.75rem;color:#667eea;font-weight:700;min-width:25px}
+    .q-item-text{flex:1;font-size:.85rem;font-weight:600;line-height:1.3}
+    .q-item-cat{font-size:.65rem;padding:2px 8px;border-radius:10px;background:rgba(102,126,234,.2);color:#667eea;white-space:nowrap}
+    .q-item-actions{display:flex;gap:5px;margin-top:8px;justify-content:flex-end}
+    .q-item-meta{font-size:.7rem;color:#666;margin-top:6px}
+    .q-item-answer{color:#00f5a0;font-size:.75rem;font-weight:600}
+
+    /* Stats */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+    .stat-box{background:rgba(255,255,255,.05);border-radius:12px;padding:18px;text-align:center;border:1px solid rgba(255,255,255,.08)}
+    .stat-num{font-size:2.5rem;font-weight:900}
+    .stat-label{font-size:.75rem;color:#a0a0cc;margin-top:4px}
+    .stat-num.green{color:#00f5a0}.stat-num.blue{color:#667eea}.stat-num.gold{color:#ffd700}.stat-num.red{color:#ff6b6b}
+
+    /* Import/Export */
+    .file-area{border:2px dashed rgba(255,255,255,.15);border-radius:12px;padding:30px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:15px}
+    .file-area:hover{border-color:#667eea;background:rgba(102,126,234,.05)}
+    .file-area-icon{font-size:2.5rem;margin-bottom:8px}
+    .file-area-text{color:#a0a0cc;font-size:.85rem}
+    .file-input{display:none}
+
+    .alert{padding:12px 16px;border-radius:8px;font-size:.85rem;margin-bottom:15px;display:none}
+    .alert-success{background:rgba(0,245,160,.1);border:1px solid rgba(0,245,160,.3);color:#00f5a0;display:block}
+    .alert-danger{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;display:block}
+
+    .separator{height:1px;background:rgba(255,255,255,.08);margin:20px 0}
+    .section-title{font-size:1rem;font-weight:700;margin-bottom:12px;color:#667eea}
+    .text-muted{color:#666;font-size:.8rem}
+    .mt-10{margin-top:10px}
+    .mb-15{margin-bottom:15px}
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="container">
+  <div class="header">
+    <div class="logo">QUIZ MASTER - Admin</div>
+    <div class="sub">Panel de Administracion</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login">
+    <div class="login-box">
+      <div class="login-icon">&#128274;</div>
+      <h2>Acceso Administrador</h2>
+      <div class="form-group">
+        <input type="password" class="form-input" id="pwd" placeholder="Contrasena" style="text-align:center">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()" style="width:100%">Entrar</button>
+      <div class="alert" id="login-err" style="margin-top:10px"></div>
+      <p class="text-muted mt-10">Contrasena por defecto: <strong>admin2026</strong></p>
+    </div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="panel">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('tab-questions',this)">&#128221; Preguntas</button>
+      <button class="tab" onclick="switchTab('tab-add',this)">&#10133; Agregar</button>
+      <button class="tab" onclick="switchTab('tab-import',this)">&#128229; Importar/Exportar</button>
+      <button class="tab" onclick="switchTab('tab-settings',this)">&#9881; Configuracion</button>
+    </div>
+
+    <!-- TAB: Questions -->
+    <div id="tab-questions" class="tab-content active">
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-num blue" id="st-total">0</div><div class="stat-label">Total preguntas</div></div>
+        <div class="stat-box"><div class="stat-num gold" id="st-cats">0</div><div class="stat-label">Categorias</div></div>
+        <div class="stat-box"><div class="stat-num green" id="st-time">0</div><div class="stat-label">Tiempo total (min)</div></div>
+      </div>
+      <div class="btn-group mb-15">
+        <select class="form-input" id="filter-cat" onchange="renderQuestions()" style="width:auto;padding:6px 12px;font-size:.8rem">
+          <option value="">Todas las categorias</option>
+        </select>
+        <button class="btn btn-danger btn-sm" onclick="deleteAll()">&#128465; Borrar todas</button>
+        <button class="btn btn-outline btn-sm" onclick="restoreDefaults()">&#8634; Restaurar originales</button>
+      </div>
+      <div class="q-list" id="q-list"></div>
+    </div>
+
+    <!-- TAB: Add/Edit -->
+    <div id="tab-add" class="tab-content">
+      <div class="section-title" id="form-title">&#10133; Nueva Pregunta</div>
+      <div class="alert" id="form-alert"></div>
+      <input type="hidden" id="edit-idx" value="-1">
+      <div class="form-group">
+        <label>Pregunta</label>
+        <textarea class="form-input" id="f-question" placeholder="Escribe la pregunta aqui..." rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Opciones de respuesta (selecciona la correcta con el circulo)</label>
+        <div class="opt-row"><span class="opt-label ol0">A</span><input class="form-input" id="f-o0" placeholder="Opcion A"><input type="radio" name="correct" value="0" class="opt-radio"><span class="opt-correct-label">Correcta</span></div>
+        <div class="opt-row"><span class="opt-label ol1">B</span><input class="form-input" id="f-o1" placeholder="Opcion B"><input type="radio" name="correct" value="1" class="opt-radio"><span class="opt-correct-label">Correcta</span></div>
+        <div class="opt-row"><span class="opt-label ol2">C</span><input class="form-input" id="f-o2" placeholder="Opcion C"><input type="radio" name="correct" value="2" class="opt-radio"><span class="opt-correct-label">Correcta</span></div>
+        <div class="opt-row"><span class="opt-label ol3">D</span><input class="form-input" id="f-o3" placeholder="Opcion D"><input type="radio" name="correct" value="3" class="opt-radio"><span class="opt-correct-label">Correcta</span></div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group"><label>Categoria</label><input class="form-input" id="f-cat" placeholder="Ej: Virus, Malware..." list="cat-list"><datalist id="cat-list"></datalist></div>
+        <div class="form-group"><label>Tiempo (segundos)</label><input type="number" class="form-input" id="f-time" value="20" min="5" max="60"></div>
+        <div class="form-group"><label>&nbsp;</label><div class="text-muted" style="padding-top:4px">15s = facil, 20s = normal, 30s = dificil</div></div>
+      </div>
+      <div class="form-group">
+        <label>Explicacion (por que es correcta y las otras no)</label>
+        <textarea class="form-input" id="f-exp" placeholder="Explica por que esta es la respuesta correcta..." rows="3"></textarea>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="saveQuestion()">&#128190; Guardar Pregunta</button>
+        <button class="btn btn-outline" onclick="clearForm()">Limpiar</button>
+      </div>
+    </div>
+
+    <!-- TAB: Import/Export -->
+    <div id="tab-import" class="tab-content">
+      <div class="section-title">&#128229; Importar preguntas</div>
+      <p class="text-muted mb-15">Sube un archivo JSON con preguntas. El formato debe ser un array de objetos con: q, o (array de 4), c (indice correcto 0-3), t (tiempo), cat, exp.</p>
+      <div class="file-area" onclick="document.getElementById('file-input').click()">
+        <div class="file-area-icon">&#128196;</div>
+        <div class="file-area-text">Haz clic para seleccionar un archivo JSON</div>
+        <input type="file" class="file-input" id="file-input" accept=".json" onchange="importJSON(this)">
+      </div>
+      <div class="alert" id="import-alert"></div>
+
+      <div class="separator"></div>
+
+      <div class="section-title">&#128228; Exportar preguntas</div>
+      <p class="text-muted mb-15">Descarga todas las preguntas actuales como archivo JSON para respaldo o compartir.</p>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="exportJSON()">&#128190; Descargar JSON</button>
+        <button class="btn btn-outline" onclick="copyJSON()">&#128203; Copiar al portapapeles</button>
+      </div>
+    </div>
+
+    <!-- TAB: Settings -->
+    <div id="tab-settings" class="tab-content">
+      <div class="section-title">&#128273; Cambiar contrasena</div>
+      <div class="form-row" style="max-width:400px">
+        <div class="form-group"><label>Nueva contrasena</label><input type="password" class="form-input" id="new-pwd" placeholder="Nueva contrasena"></div>
+        <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary" onclick="changePwd()" style="width:100%">Cambiar</button></div>
+      </div>
+      <div class="alert" id="pwd-alert" style="max-width:400px"></div>
+
+      <div class="separator"></div>
+
+      <div class="section-title">&#128465; Reiniciar Ranking</div>
+      <p class="text-muted mb-15">Esto borra todos los puntajes de los jugadores. Se aplica cuando recargas el Quiz Master.</p>
+      <button class="btn btn-danger" onclick="resetRanking()">&#128465; Reiniciar Ranking Ahora</button>
+      <div class="alert" id="rank-alert" style="margin-top:10px"></div>
+
+      <div class="separator"></div>
+
+      <div class="section-title">&#127760; Enlace del Quiz</div>
+      <p class="text-muted mb-15">Comparte este enlace con los estudiantes o abrelo para iniciar una sesion:</p>
+      <div style="background:rgba(255,255,255,.06);padding:12px;border-radius:8px;word-break:break-all">
+        <a href="index.html" style="color:#667eea;text-decoration:none;font-weight:600" target="_blank">&#127918; Abrir Quiz Master (Panel del Profesor)</a>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="section-title">&#128218; Formato JSON de preguntas</div>
+      <pre style="background:rgba(255,255,255,.05);padding:14px;border-radius:8px;font-size:.75rem;overflow-x:auto;color:#a0a0cc;text-align:left;line-height:1.5">[
+  {
+    "q": "Texto de la pregunta",
+    "o": ["Opcion A", "Opcion B", "Opcion C", "Opcion D"],
+    "c": 1,
+    "t": 20,
+    "cat": "Categoria",
+    "exp": "Explicacion de la respuesta"
+  }
+]</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+// === DEFAULT QUESTIONS ===
+const DEFAULTS=[
+  {q:"Que es un virus informatico?",o:["Un programa que optimiza el sistema","Un programa malicioso que se replica y causa danos","Un tipo de hardware defectuoso","Una actualizacion del sistema operativo"],c:1,t:20,cat:"Virus",exp:"Un virus informatico es un programa malicioso que se adjunta a archivos legitimos y se replica al ejecutarlos. A diferencia de un programa normal, su objetivo es danar, robar informacion o interrumpir el sistema."},
+  {q:"Cual es una caracteristica fundamental de un virus informatico?",o:["No necesita un archivo huesped","Se ejecuta de forma independiente","Necesita un huesped (archivo o programa) para reproducirse","Solo afecta a hardware"],c:2,t:20,cat:"Virus",exp:"A diferencia de un gusano que se propaga solo, un virus NECESITA un archivo huesped para adjuntarse y replicarse."},
+  {q:"Que comando se usa en Linux para escanear todo el sistema con ClamAV?",o:["clamscan -r /","clamav --scan-all","sudo scan-virus /","antivirus --check /"],c:0,t:20,cat:"Comandos",exp:"'clamscan -r /' es el comando correcto: clamscan es el ejecutable, -r activa escaneo recursivo, y / indica la raiz."},
+  {q:"Que herramienta se especializa en detectar rootkits en Linux?",o:["ClamAV","Wireshark","rkhunter (Rootkit Hunter)","BleachBit"],c:2,t:20,cat:"Herramientas",exp:"rkhunter esta disenado especificamente para detectar rootkits, backdoors y exploits locales."},
+  {q:"Que es el Spyware?",o:["Software que acelera internet","Software malicioso que recopila datos sin consentimiento","Un tipo de firewall para Linux","Un programa de copias de seguridad"],c:1,t:20,cat:"Spyware",exp:"El spyware recopila informacion personal sin conocimiento del usuario: contrasenas, habitos de navegacion, datos bancarios."},
+  {q:"Cual de estos es un tipo de spyware?",o:["Firewall","Keylogger","Compilador","Servidor DNS"],c:1,t:15,cat:"Spyware",exp:"Un keylogger registra cada tecla presionada, capturando contrasenas y datos sensibles sin conocimiento del usuario."},
+  {q:"Que es un paquete .deb?",o:["Un archivo de texto plano","El formato estandar de instalacion en Debian/Ubuntu","Un tipo de virus para Linux","Un lenguaje de programacion"],c:1,t:15,cat:"Paquetes .deb",exp:"Los .deb son el formato de paquetes de Debian y derivadas (Ubuntu, Mint). Equivalente a un .exe instalador en Windows."},
+  {q:"Cual es la diferencia principal entre dpkg y apt?",o:["dpkg es mas nuevo que apt","apt no puede instalar paquetes","dpkg NO resuelve dependencias, apt SI las resuelve","No hay diferencia, son iguales"],c:2,t:20,cat:"Paquetes .deb",exp:"dpkg instala paquetes .deb directamente pero NO resuelve dependencias. apt es de alto nivel y resuelve dependencias automaticamente."},
+  {q:"Que comando instala un paquete .deb manualmente?",o:["sudo apt install archivo.deb","sudo dpkg -i archivo.deb","sudo rpm -i archivo.deb","sudo install archivo.deb"],c:1,t:15,cat:"Comandos",exp:"'sudo dpkg -i archivo.deb': dpkg es el gestor de paquetes .deb y -i significa install. rpm es para Red Hat."},
+  {q:"Que significa Malware?",o:["Software de mantenimiento","Software malicioso (malicious software)","Software de marketing","Hardware defectuoso"],c:1,t:15,cat:"Malware",exp:"Malware = malicious software. Termino general que engloba virus, troyanos, ransomware, spyware y todo programa danino."},
+  {q:"Cual fue el primer programa que se propagaba por red?",o:["Stuxnet","Elk Cloner","Creeper (1971)","ILOVEYOU"],c:2,t:20,cat:"Malware",exp:"Creeper (1971) fue el primer programa autorreplicante en ARPANET. Elk Cloner (1982) fue el primero en PC."},
+  {q:"Que tipo de malware cifra archivos y exige pago?",o:["Spyware","Adware","Ransomware","Keylogger"],c:2,t:15,cat:"Malware",exp:"Ransomware (de ransom = rescate) cifra archivos y exige pago para descifrarlos. Es el unico que secuestra archivos."},
+  {q:"Que es Wireshark?",o:["Un antivirus para Linux","Software de analisis de paquetes de red libre","Un firewall empresarial","Un gestor de paquetes .deb"],c:1,t:20,cat:"Herramientas",exp:"Wireshark es un analizador de protocolos de red open source que captura y muestra trafico de red en tiempo real."},
+  {q:"Que significa UFW?",o:["Universal File Watcher","Uncomplicated Firewall","Ubuntu Free Wireless","Unix Framework for Web"],c:1,t:15,cat:"Herramientas",exp:"UFW = Uncomplicated Firewall. Interfaz simplificada para iptables en Ubuntu/Debian."},
+  {q:"Que hace el comando 'sudo freshclam'?",o:["Instala ClamAV","Elimina virus del sistema","Actualiza la base de datos de firmas de ClamAV","Desinstala ClamAV"],c:2,t:20,cat:"Comandos",exp:"freshclam actualiza las definiciones de virus de ClamAV. Sin firmas actualizadas no detecta amenazas nuevas."},
+  {q:"Donde se encuentran los logs del sistema en Linux?",o:["/home/logs","/var/log","/etc/logs","/usr/log"],c:1,t:15,cat:"Comandos",exp:"/var/log almacena todos los registros del sistema (syslog, auth.log, kern.log). /var contiene datos variables."},
+  {q:"Que hace el comando 'lsof -i' en Linux?",o:["Lista archivos del sistema","Muestra todas las conexiones de red activas","Instala paquetes de red","Configura la interfaz de red"],c:1,t:20,cat:"Comandos",exp:"lsof = List Open Files. Con -i filtra conexiones de red, mostrando puertos abiertos y conexiones activas."},
+  {q:"Que navegador usa la red Tor para proteger el anonimato?",o:["LibreWolf","Firefox","Tor Browser","Chromium"],c:2,t:15,cat:"Herramientas",exp:"Tor Browser enruta el trafico a traves de multiples servidores para ocultar la IP. LibreWolf y Firefox no usan Tor por defecto."},
+  {q:"Que es BleachBit?",o:["Un antivirus para Linux","Un navegador web seguro","Herramienta que elimina archivos innecesarios como cache y cookies","Un gestor de contrasenas"],c:2,t:20,cat:"Herramientas",exp:"BleachBit elimina archivos temporales, cache, cookies y logs. Libera espacio y protege la privacidad."},
+  {q:"Que hace apt-cache show?",o:["Instala un paquete","Muestra info completa: version, descripcion, dependencias","Elimina un paquete del sistema","Actualiza todos los paquetes"],c:1,t:20,cat:"Paquetes .deb",exp:"apt-cache show muestra toda la informacion de un paquete. Es solo lectura, no modifica el sistema."},
+  {q:"Que son las dependencias en paquetes Linux?",o:["Virus que se adjuntan a los paquetes","Librerias y paquetes obligatorios que un programa necesita","Archivos temporales del sistema","Actualizaciones pendientes"],c:1,t:20,cat:"Paquetes .deb",exp:"Las dependencias son librerias y paquetes requeridos para que un programa funcione correctamente."},
+  {q:"Que tipo de malware se disfraza de software legitimo?",o:["Virus","Gusano (Worm)","Troyano","Adware"],c:2,t:15,cat:"Malware",exp:"El Troyano se disfraza de software util para enganar al usuario. Una vez instalado, abre puertas traseras."},
+  {q:"Cual es una senal de infeccion por malware?",o:["El equipo funciona mas rapido","El equipo va muy lento sin razon aparente","Se actualizan los programas automaticamente","Aparecen nuevas actualizaciones"],c:1,t:15,cat:"Malware",exp:"Un equipo lento sin razon es senal clasica: el malware consume CPU, RAM y red en segundo plano."},
+  {q:"Que extension bloquea rastreadores segun la EFF?",o:["uBlock Origin","Privacy Badger","AdBlock Plus","NoScript"],c:1,t:20,cat:"Herramientas",exp:"Privacy Badger fue creado por la EFF y aprende a bloquear rastreadores invisibles automaticamente."},
+  {q:"Que principio garantiza acceso solo a recursos necesarios?",o:["Principio de maximo acceso","Principio de minimo privilegio","Principio de transparencia total","Principio de redundancia"],c:1,t:20,cat:"Seguridad",exp:"Minimo privilegio: cada usuario solo debe tener los permisos estrictamente necesarios para su funcion."},
+  {q:"Que hace 'find / -perm -4000' en Linux?",o:["Busca archivos mayores a 4000 bytes","Busca archivos con permiso SUID que podrian ser explotados","Encuentra 4000 archivos aleatorios","Busca archivos creados hace 4000 dias"],c:1,t:20,cat:"Comandos",exp:"SUID (4000) permite ejecutar archivos con privilegios del propietario. Un SUID mal configurado puede ser explotado."},
+  {q:"Donde se configuran los repositorios en Linux?",o:["/home/user/repos","/etc/apt/sources.list","/var/repos/config","/usr/local/repos"],c:1,t:15,cat:"Paquetes .deb",exp:"/etc/apt/sources.list define los repositorios de paquetes en Debian/Ubuntu. apt descarga paquetes de alli."},
+  {q:"Que caracteristica del malware le permite cambiar su codigo?",o:["Persistencia","Polimorfismo","Autorreplicacion","Escalada de privilegios"],c:1,t:20,cat:"Malware",exp:"El polimorfismo permite al malware modificar su codigo en cada copia, dificultando la deteccion por firmas."},
+  {q:"Que comando habilita el firewall UFW en Linux?",o:["sudo firewall start","sudo ufw enable","sudo iptables --on","sudo firewalld activate"],c:1,t:15,cat:"Comandos",exp:"'sudo ufw enable' activa UFW. Los otros comandos no son validos para UFW."},
+  {q:"Cual NO es un vector de propagacion de virus?",o:["Archivos ejecutables infectados","Correos con adjuntos maliciosos","Actualizar el sistema operativo","Descargas de sitios no oficiales"],c:2,t:20,cat:"Virus",exp:"Actualizar el SO es una MEDIDA DE PROTECCION que corrige vulnerabilidades, no un vector de ataque."}
+];
+
+const STORAGE_KEY='quiz_custom_questions';
+const PWD_KEY='quiz_admin_pwd';
+const DEFAULT_PWD='admin2026';
+
+function getQuestions(){const s=localStorage.getItem(STORAGE_KEY);return s?JSON.parse(s):[...DEFAULTS];}
+function saveQuestions(q){localStorage.setItem(STORAGE_KEY,JSON.stringify(q));}
+function getPwd(){return localStorage.getItem(PWD_KEY)||DEFAULT_PWD;}
+
+// === LOGIN ===
+function doLogin(){
+  const p=document.getElementById('pwd').value;
+  if(p===getPwd()){document.getElementById('login').style.display='none';document.getElementById('panel').style.display='block';refreshAll();}
+  else{showAlert('login-err','Contrasena incorrecta','danger');}
+}
+document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// === TABS ===
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
+  if(id==='tab-add'&&document.getElementById('edit-idx').value==='-1')clearForm();
+}
+
+// === RENDER ===
+function refreshAll(){renderStats();renderQuestions();renderCatFilter();renderCatList();}
+
+function renderStats(){
+  const q=getQuestions(),cats=[...new Set(q.map(x=>x.cat))];
+  document.getElementById('st-total').textContent=q.length;
+  document.getElementById('st-cats').textContent=cats.length;
+  document.getElementById('st-time').textContent=Math.round(q.reduce((a,x)=>a+x.t,0)/60);
+}
+
+function renderCatFilter(){
+  const q=getQuestions(),cats=[...new Set(q.map(x=>x.cat))].sort(),sel=document.getElementById('filter-cat'),val=sel.value;
+  sel.innerHTML='<option value="">Todas las categorias</option>'+cats.map(c=>'<option value="'+c+'">'+c+' ('+q.filter(x=>x.cat===c).length+')</option>').join('');
+  sel.value=val;
+}
+
+function renderCatList(){
+  const q=getQuestions(),cats=[...new Set(q.map(x=>x.cat))].sort();
+  document.getElementById('cat-list').innerHTML=cats.map(c=>'<option value="'+c+'">').join('');
+}
+
+function renderQuestions(){
+  const q=getQuestions(),filter=document.getElementById('filter-cat').value;
+  const filtered=filter?q.map((x,i)=>({...x,idx:i})).filter(x=>x.cat===filter):q.map((x,i)=>({...x,idx:i}));
+  document.getElementById('q-list').innerHTML=filtered.length===0?'<p class="text-muted" style="text-align:center;padding:30px">No hay preguntas. Agrega una o restaura las originales.</p>':
+    filtered.map(x=>'<div class="q-item"><div class="q-item-header"><span class="q-item-num">#'+(x.idx+1)+'</span><span class="q-item-text">'+x.q+'</span><span class="q-item-cat">'+x.cat+'</span></div><div class="q-item-meta"><span class="q-item-answer">&#10003; '+x.o[x.c]+'</span> &middot; '+x.t+'s</div><div class="q-item-actions"><button class="btn btn-outline btn-sm" onclick="editQuestion('+x.idx+')">&#9998; Editar</button><button class="btn btn-danger btn-sm" onclick="deleteQuestion('+x.idx+')">&#128465;</button></div></div>').join('');
+}
+
+// === CRUD ===
+function saveQuestion(){
+  const q=document.getElementById('f-question').value.trim();
+  const o=[0,1,2,3].map(i=>document.getElementById('f-o'+i).value.trim());
+  const cRadio=document.querySelector('input[name="correct"]:checked');
+  const cat=document.getElementById('f-cat').value.trim();
+  const t=parseInt(document.getElementById('f-time').value)||20;
+  const exp=document.getElementById('f-exp').value.trim();
+  if(!q){showAlert('form-alert','Escribe la pregunta','danger');return;}
+  if(o.some(x=>!x)){showAlert('form-alert','Completa las 4 opciones','danger');return;}
+  if(!cRadio){showAlert('form-alert','Selecciona la respuesta correcta','danger');return;}
+  if(!cat){showAlert('form-alert','Escribe la categoria','danger');return;}
+  if(!exp){showAlert('form-alert','Escribe la explicacion','danger');return;}
+  const c=parseInt(cRadio.value),questions=getQuestions();
+  const item={q,o,c,t:Math.max(5,Math.min(60,t)),cat,exp};
+  const idx=parseInt(document.getElementById('edit-idx').value);
+  if(idx>=0&&idx<questions.length){questions[idx]=item;showAlert('form-alert','Pregunta actualizada','success');}
+  else{questions.push(item);showAlert('form-alert','Pregunta agregada (#'+(questions.length)+')','success');}
+  saveQuestions(questions);clearForm();refreshAll();
+}
+
+function editQuestion(idx){
+  const q=getQuestions()[idx];if(!q)return;
+  switchTab('tab-add',document.querySelectorAll('.tab')[1]);
+  document.getElementById('edit-idx').value=idx;
+  document.getElementById('form-title').innerHTML='&#9998; Editar Pregunta #'+(idx+1);
+  document.getElementById('f-question').value=q.q;
+  [0,1,2,3].forEach(i=>document.getElementById('f-o'+i).value=q.o[i]);
+  document.querySelector('input[name="correct"][value="'+q.c+'"]').checked=true;
+  document.getElementById('f-cat').value=q.cat;
+  document.getElementById('f-time').value=q.t;
+  document.getElementById('f-exp').value=q.exp;
+}
+
+function deleteQuestion(idx){
+  if(!confirm('Eliminar pregunta #'+(idx+1)+'?'))return;
+  const q=getQuestions();q.splice(idx,1);saveQuestions(q);refreshAll();
+}
+
+function deleteAll(){
+  if(!confirm('Eliminar TODAS las preguntas?'))return;
+  saveQuestions([]);refreshAll();
+}
+
+function restoreDefaults(){
+  if(!confirm('Restaurar las 30 preguntas originales? Se perderan las personalizadas.'))return;
+  saveQuestions([...DEFAULTS]);refreshAll();
+  showAlert('form-alert','Preguntas originales restauradas','success');
+}
+
+function clearForm(){
+  document.getElementById('edit-idx').value='-1';
+  document.getElementById('form-title').innerHTML='&#10133; Nueva Pregunta';
+  ['f-question','f-o0','f-o1','f-o2','f-o3','f-cat','f-exp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-time').value='20';
+  document.querySelectorAll('input[name="correct"]').forEach(r=>r.checked=false);
+  document.getElementById('form-alert').className='alert';
+}
+
+// === IMPORT/EXPORT ===
+function importJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data))throw new Error('No es un array');
+      const valid=data.filter(q=>q.q&&Array.isArray(q.o)&&q.o.length===4&&typeof q.c==='number'&&q.cat);
+      if(valid.length===0)throw new Error('No se encontraron preguntas validas');
+      valid.forEach(q=>{if(!q.t)q.t=20;if(!q.exp)q.exp='Sin explicacion disponible.';});
+      const existing=getQuestions();
+      const merged=[...existing,...valid];
+      saveQuestions(merged);refreshAll();
+      showAlert('import-alert',valid.length+' preguntas importadas (total: '+merged.length+')','success');
+    }catch(err){showAlert('import-alert','Error: '+err.message,'danger');}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function exportJSON(){
+  const q=getQuestions(),blob=new Blob([JSON.stringify(q,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='quiz-preguntas-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+
+function copyJSON(){
+  const q=getQuestions();
+  navigator.clipboard.writeText(JSON.stringify(q,null,2)).then(()=>alert('Copiado al portapapeles'));
+}
+
+// === SETTINGS ===
+function changePwd(){
+  const p=document.getElementById('new-pwd').value;
+  if(p.length<4){showAlert('pwd-alert','Minimo 4 caracteres','danger');return;}
+  localStorage.setItem(PWD_KEY,p);showAlert('pwd-alert','Contrasena actualizada','success');
+  document.getElementById('new-pwd').value='';
+}
+
+function resetRanking(){
+  localStorage.removeItem('quiz_ranking');
+  showAlert('rank-alert','Ranking reiniciado. Recarga el Quiz Master para aplicar.','success');
+}
+
+function showAlert(id,msg,type){
+  const el=document.getElementById(id);el.textContent=msg;
+  el.className='alert alert-'+type;
+  setTimeout(()=>{el.className='alert';},4000);
+}
+
+// Init: ensure questions exist
+if(!localStorage.getItem(STORAGE_KEY))saveQuestions([...DEFAULTS]);
+</script>
+</body>
+</html>
