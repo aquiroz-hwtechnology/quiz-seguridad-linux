@@ -209,8 +209,8 @@ function init(){
     document.getElementById('qr-img').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=1a1a2e&data='+encodeURIComponent(url);
   });
   peer.on('connection',conn=>{
-    conn.on('data',d=>handlePlayerMsg(conn,d));
-    conn.on('close',()=>{const p=Object.entries(players).find(([k,v])=>v.connId===conn.peer);if(p){delete players[p[0]];delete conns[conn.peer];delete answers[conn.peer];updatePlayerUI();}});
+    conn.on('open',()=>{conn.on('data',d=>handlePlayerMsg(conn,d));});
+    conn.on('close',()=>{if(players[conn.peer]){delete players[conn.peer];delete conns[conn.peer];delete answers[conn.peer];updatePlayerUI();}});
   });
   peer.on('error',e=>{dot.className='status-dot off';txt.textContent='Error: '+e.type;});
 }
@@ -220,7 +220,7 @@ function handlePlayerMsg(conn,data){
     const nick=data.nickname.trim().substring(0,20);
     if(!nick){conn.send({type:'join-error',msg:'Nickname invalido'});return;}
     if(Object.values(players).some(p=>p.nickname.toLowerCase()===nick.toLowerCase())){conn.send({type:'join-error',msg:'Nickname en uso'});return;}
-    conns[conn.peer]=conn;players[conn.peer]={nickname:nick,score:0,streak:0,correct:0,total:0,connId:conn.peer};
+    conns[conn.peer]=conn;players[conn.peer]={nickname:nick,score:0,streak:0,correct:0,total:0};
     conn.send({type:'joined',nickname:nick});sndStart();updatePlayerUI();
   }
   if(data.type==='answer'&&curQ>=0){

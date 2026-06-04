@@ -97,6 +97,7 @@
     <div class="qopts" id="pqo"></div>
   </div>
   <div id="s-result" class="screen">
+    <div style="font-size:.8rem;color:#667eea;font-weight:700;margin-bottom:5px" id="r-player-name"></div>
     <div class="ri" id="ri"></div>
     <div class="rmsg" id="rmsg"></div>
     <div class="rtxt" id="rtxt"></div>
@@ -108,7 +109,9 @@
     <div class="rwait">Esperando siguiente pregunta...</div>
   </div>
   <div id="s-lb" class="screen">
-    <div class="lpt">RANKING</div><div class="lppos" id="lppos">#1</div>
+    <div class="lpt">RANKING</div>
+    <div style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:5px" id="lb-player-name"></div>
+    <div class="lppos" id="lppos">#1</div>
     <div class="lpl">Tu posicion</div><div class="lpsc" id="lpsc">0 pts</div>
     <div class="lpnx">Preparando siguiente pregunta...</div>
   </div>
@@ -171,6 +174,7 @@ function handleMsg(d){
   }
   if(d.type==='answer-result'){
     clearInterval(timerInt);show('s-result');
+    document.getElementById('r-player-name').textContent=myNick;
     const ri=document.getElementById('ri'),rm=document.getElementById('rmsg'),rt=document.getElementById('rtxt'),rp=document.getElementById('rpts'),rs=document.getElementById('rstrk'),rtl=document.getElementById('rtot'),rc=document.getElementById('rcorrect'),re=document.getElementById('rexp');
     if(d.correct){
       sndOk();ri.textContent='&#127881;';ri.className='ri ok';
@@ -188,8 +192,12 @@ function handleMsg(d){
     rtl.textContent='Puntuacion total: '+d.totalScore.toLocaleString();
   }
   if(d.type==='leaderboard'||d.type==='show-leaderboard'){
-    show('s-lb');const pos=d.leaderboard.findIndex(p=>p.nickname===myNick);
-    document.getElementById('lppos').textContent='#'+(pos+1);const me=d.leaderboard[pos];
+    show('s-lb');
+    document.getElementById('lb-player-name').textContent=myNick;
+    const pos=d.leaderboard.findIndex(p=>p.nickname===myNick);
+    const realPos=pos>=0?pos:d.leaderboard.length;
+    document.getElementById('lppos').textContent='#'+(realPos+1);
+    const me=pos>=0?d.leaderboard[pos]:null;
     document.getElementById('lpsc').textContent=me?me.score.toLocaleString()+' pts':'0 pts';
   }
   if(d.type==='game-finished'){
