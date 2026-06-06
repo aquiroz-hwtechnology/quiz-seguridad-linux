@@ -196,23 +196,58 @@ const Q=(()=>{try{const s=localStorage.getItem('quiz_custom_questions');if(s){co
 let peer,conns={},players={},curQ=-1,qStart=0,answers={},timerInt,totalQ=Q.length;
 const roomId='quiz-'+Math.random().toString(36).substr(2,6);
 
+let keepAliveInt,reconnectTimer;
 function init(){
   document.getElementById('q-info').textContent=totalQ+' preguntas cargadas';
   const dot=document.getElementById('status-dot'),txt=document.getElementById('status-text');
   dot.className='status-dot off';txt.textContent='Conectando...';
-  peer=new Peer(roomId,{debug:0});
+  if(peer){try{peer.destroy();}catch(e){}}
+  peer=new Peer(roomId,{debug:0,config:{'iceServers':[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'}]}});
   peer.on('open',id=>{
     dot.className='status-dot on';txt.textContent='Sala activa: '+id;
     document.getElementById('room-code').textContent=id.toUpperCase();
     const base=location.href.replace(/\/[^/]*$/,'/'),url=base+'play.html?room='+id;
     document.getElementById('join-url').textContent=url;
     document.getElementById('qr-img').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=1a1a2e&data='+encodeURIComponent(url);
+    // Keepalive: ping PeerJS server every 20s to prevent timeout
+    clearInterval(keepAliveInt);
+    keepAliveInt=setInterval(()=>{
+      if(peer&&!peer.disconnected&&!peer.destroyed){
+        // Send a lightweight signal to keep connection alive
+        Object.values(conns).forEach(c=>{try{c.send({type:'ping'});}catch(e){}});
+      }else{
+        // Auto-reconnect if disconnected
+        dot.className='status-dot off';txt.textContent='Reconectando...';
+        reconnectPeer();
+      }
+    },20000);
   });
   peer.on('connection',conn=>{
     conn.on('open',()=>{conn.on('data',d=>handlePlayerMsg(conn,d));});
     conn.on('close',()=>{if(players[conn.peer]){delete players[conn.peer];delete conns[conn.peer];delete answers[conn.peer];updatePlayerUI();}});
   });
-  peer.on('error',e=>{dot.className='status-dot off';txt.textContent='Error: '+e.type;});
+  peer.on('disconnected',()=>{
+    dot.className='status-dot off';txt.textContent='Desconectado. Reconectando...';
+    reconnectPeer();
+  });
+  peer.on('error',e=>{
+    dot.className='status-dot off';txt.textContent='Error: '+e.type;
+    if(e.type==='disconnected'||e.type==='network'||e.type==='server-error'){
+      reconnectPeer();
+    }
+  });
+}
+
+function reconnectPeer(){
+  clearTimeout(reconnectTimer);
+  reconnectTimer=setTimeout(()=>{
+    const dot=document.getElementById('status-dot'),txt=document.getElementById('status-text');
+    if(peer&&!peer.destroyed){
+      try{peer.reconnect();txt.textContent='Reconectando...';}catch(e){
+        txt.textContent='Reiniciando sala...';init();
+      }
+    }else{init();}
+  },3000);
 }
 
 function handlePlayerMsg(conn,data){

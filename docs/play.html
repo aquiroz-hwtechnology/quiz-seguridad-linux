@@ -147,17 +147,51 @@ inp.addEventListener('input',()=>{const v=inp.value.trim();ccEl.textContent=inp.
 inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!btnJ.disabled)joinGame();});
 btnJ.addEventListener('click',joinGame);
 
+let joinRetries=0;const MAX_RETRIES=3;
 function joinGame(){
   const nick=inp.value.trim();if(!nick||!roomId)return;
-  btnJ.disabled=true;btnJ.textContent='Conectando...';document.getElementById('err').textContent='';
-  peer=new Peer(undefined,{debug:0});
+  btnJ.disabled=true;document.getElementById('err').textContent='';
+  btnJ.textContent=joinRetries>0?'Reintentando ('+joinRetries+'/'+MAX_RETRIES+')...':'Conectando...';
+  if(peer){try{peer.destroy();}catch(e){}}
+  peer=new Peer(undefined,{debug:0,config:{'iceServers':[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'}]}});
   peer.on('open',()=>{
     conn=peer.connect(roomId,{reliable:true});
     conn.on('open',()=>{conn.send({type:'join',nickname:nick});});
-    conn.on('data',d=>handleMsg(d));conn.on('close',()=>show('s-dc'));conn.on('error',()=>show('s-dc'));
-    setTimeout(()=>{if(!myNick){document.getElementById('err').textContent='No se pudo conectar. Verifica el codigo.';btnJ.disabled=false;btnJ.textContent='UNIRSE';}},8000);
+    conn.on('data',d=>{if(d.type!=='ping')handleMsg(d);});
+    conn.on('close',()=>{if(myNick)show('s-dc');});
+    conn.on('error',()=>{if(myNick)show('s-dc');});
+    // Extended timeout: 30 seconds before giving up
+    setTimeout(()=>{
+      if(!myNick){
+        joinRetries++;
+        if(joinRetries<=MAX_RETRIES){
+          // Auto-retry
+          btnJ.textContent='Reintentando ('+joinRetries+'/'+MAX_RETRIES+')...';
+          try{peer.destroy();}catch(e){}
+          setTimeout(()=>joinGame(),1000);
+        }else{
+          document.getElementById('err').textContent='No se pudo conectar despues de '+MAX_RETRIES+' intentos. Verifica que el profesor tenga la sala abierta y usa Chrome.';
+          btnJ.disabled=false;btnJ.textContent='UNIRSE';joinRetries=0;
+        }
+      }
+    },30000);
   });
-  peer.on('error',()=>{document.getElementById('err').textContent='Error de conexion. Usa Chrome en vez de Brave.';btnJ.disabled=false;btnJ.textContent='UNIRSE';});
+  peer.on('error',e=>{
+    if(e.type==='peer-unavailable'){
+      // Room doesn't exist - retry or fail
+      joinRetries++;
+      if(joinRetries<=MAX_RETRIES){
+        document.getElementById('err').textContent='Sala no encontrada. Reintentando ('+joinRetries+'/'+MAX_RETRIES+')...';
+        setTimeout(()=>joinGame(),3000);
+      }else{
+        document.getElementById('err').textContent='Sala no disponible. Pide al profesor que reinicie la sala.';
+        btnJ.disabled=false;btnJ.textContent='UNIRSE';joinRetries=0;
+      }
+    }else{
+      document.getElementById('err').textContent='Error de conexion. Usa Chrome en vez de Brave.';
+      btnJ.disabled=false;btnJ.textContent='UNIRSE';joinRetries=0;
+    }
+  });
 }
 
 function handleMsg(d){
